@@ -9,13 +9,13 @@ export default defineConfig({
       "react-dom": "preact-compat"
     },
   },
-  build: {
-    manifest: true,
-    rollupOptions: {
-      // overwrite default .html entry
-      input: './src/main.tsx'
-    }
-  },
+  // build: {
+  //   manifest: true,
+  //   rollupOptions: {
+  //     // overwrite default .html entry
+  //     input: './src/main.tsx'
+  //   }
+  // },
   plugins: [preact()],
   server: {
     host: true,

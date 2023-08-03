@@ -10,3 +10,5 @@ bootleg
 /libmergestat.so
 .venv
 .vscode
+# Local Netlify folder
+.netlify

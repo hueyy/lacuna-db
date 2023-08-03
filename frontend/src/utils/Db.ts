@@ -17,7 +17,8 @@ const config = {
   config: {
     serverMode: 'full' as const,
     requestChunkSize: 4096, // the page size of the  sqlite database (by default 4096)
-    url: '/db/hearings.db'
+    url: '/db/hearings.db.png'
+    // .png as workaround for https://github.com/phiresky/sql.js-httpvfs/issues/13
   }
 }
 
