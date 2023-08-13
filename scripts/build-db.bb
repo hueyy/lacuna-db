@@ -31,9 +31,14 @@
        (str/join " ")))
 
 (defn generate-db []
-  (sh "poetry run" "git-history" "file" DB_FILE "hearings.json"
-      "--start-at" "96398149e899fe720a936dbcd6864f4b4c99b340"
-      "--skip" (get-ignored-commits)))
+  (let [result (sh "poetry run git-history file"
+                   "--start-at" "96398149e899fe720a936dbcd6864f4b4c99b340"
+                   "--skip" (get-ignored-commits)
+                   "--namespace" "hearings"
+                   DB_FILE "hearings.json")]
+    (if (not (= 0 (:exit result)))
+      (:err result)
+      (:out result))))
 
 (defn run-sql-on-db [f]
   (let [stream (-> (process ["cat" f]) :out)]
@@ -43,8 +48,8 @@
 (defn optimise-db []
   (run-sql-on-db "./sql/optimise.sql"))
 
-(defn create-indices []
-  (run-sql-on-db "./sql/create-indices.sql"))
+;; (defn create-indices []
+;;   (run-sql-on-db "./sql/create-indices.sql"))
 
 (defn regenerate-db []
   (sh "rm" (str FRONTEND_DB_FILE "*"))
@@ -75,7 +80,7 @@
 
 (defn run []
   (generate-db)
-  (create-indices)
+  ;; (create-indices)
   ;; (optimise-db)
   ;; (regenerate-db)
   ;; (add-views)
