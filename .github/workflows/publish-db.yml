@@ -2,8 +2,8 @@ name: Publish db as release
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: '19 8 * * *' # 4.19 PM GMT+8
+  # schedule:
+  #   - cron: '19 8 * * *' # 4.19 PM GMT+8
 
 jobs:
   scheduled:
@@ -32,7 +32,7 @@ jobs:
           git config user.name "Automated publish"
           git config user.email "actions@users.noreply.github.com"
           git checkout pages
-          git add -f hearings.db
+          git add -f data.db
           timestamp=$(TZ='Asia/Singapore' date)
           git commit -m "Publish db: ${timestamp}"
           git push origin pages --force
@@ -40,7 +40,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            hearings.db
+            data.db
           name: latest
           tag_name: latest
         env:

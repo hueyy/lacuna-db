@@ -6,7 +6,7 @@
          '[clojure.string :as str])
 
 (def MERGESTAT_BINARY "mergestat")
-(def DB_FILE "hearings.db")
+(def DB_FILE "data.db")
 
 (defn download-mergestat []
   (sh "wget" "https://github.com/mergestat/mergestat-lite/releases/download/v0.6.1/mergestat-linux-amd64.tar.gz")
@@ -23,12 +23,12 @@
        (map :hash)
        (str/join " ")))
 
-(defn generate-db []
+(defn generate-db [namespace input-file]
   (let [result (sh "poetry run git-history file"
                    "--start-at" "96398149e899fe720a936dbcd6864f4b4c99b340"
                    "--skip" (get-ignored-commits)
-                   "--namespace" "hearings"
-                   DB_FILE "hearings.json")]
+                   "--namespace" namespace
+                   DB_FILE input-file)]
     (if (not (= 0 (:exit result)))
       (:err result)
       (:out result))))
@@ -39,6 +39,7 @@
                                    :out :inherit})))
 
 (defn run []
-  (generate-db))
+  (generate-db "hearings" "hearings.json")
+  (generate-db "sc" "sc.json"))
 
 (run)
