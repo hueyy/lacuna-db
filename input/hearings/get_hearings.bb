@@ -1,11 +1,11 @@
 #!/usr/bin/env bb
 
-(ns input.get_hearings
+(ns input.hearings.get_hearings
   (:require [clojure.math :as math]
-            [clojure.string :as str]
             [babashka.curl :as curl]
             [babashka.pods :as pods]
-            [cheshire.core :as json])
+            [cheshire.core :as json]
+            [input.utils :as utils])
   (:import [java.time LocalDateTime]
            [java.time.format DateTimeFormatter])
   (:gen-class))
@@ -13,11 +13,11 @@
 
 (pods/load-pod 'retrogradeorbit/bootleg "0.1.9")
 
-(require '[pod.retrogradeorbit.bootleg.utils :as bootleg]
-         '[pod.retrogradeorbit.hickory.select :as s])
+(require '[pod.retrogradeorbit.hickory.select :as s])
 
 (def URL "https://www.judiciary.gov.sg/hearing-list/GetFilteredList")
-(defn make-request-body
+
+(defn- make-request-body
   ([] (make-request-body 0))
   ([page] {:model {:CurrentPage page
                    :SelectedCourtTab ""
@@ -32,34 +32,30 @@
                    :SelectedPageSize 500
                    :SelectedSortBy ""}}))
 
-(defn get-el-content [el]
-  (->> el :content (str/join "")))
-
-(defn get-hearing-list-page-raw
+(defn- get-hearing-list-page-raw
   [page]
-  (str "<html>"
-       (-> (curl/post URL {:headers {"Content-Type" "application/json; charset=utf-8"}
-                           :body (json/generate-string (make-request-body page))})
-           :body
-           (json/parse-string true)
-           :listPartialView)
-       "</html>"))
+  (-> (curl/post URL {:headers {"Content-Type" "application/json; charset=utf-8"}
+                      :body (json/generate-string (make-request-body page))})
+      :body
+      (json/parse-string true)
+      :listPartialView
+      (utils/parse-html)))
 
-(defn get-hearing-type [html-el]
+(defn- get-hearing-type [html-el]
   (let [selection (s/select
                    (s/child (s/class "hearing-metadata")
                             (s/class "hearing-type"))
                    html-el)]
     (if (> (count selection) 0)
-      (->> selection (first) (get-el-content))
+      (->> selection (first) (utils/get-el-content))
       nil)))
 
-(defn format-timestamp [timestamp]
+(defn- format-timestamp [timestamp]
   (.format DateTimeFormatter/ISO_LOCAL_DATE_TIME
            (LocalDateTime/parse timestamp
                                 (DateTimeFormatter/ofPattern "dd MMM yyyy', 'h:mm a"))))
 
-(defn parse-hearing-element [html-el]
+(defn- parse-hearing-element [html-el]
   (let [hearing-metadata-els
         (s/select (s/child (s/class "hearing-metadata")
                            (s/class "metadata-wrapper")
@@ -72,40 +68,40 @@
      :reference (if (> (count hearing-metadata-els) 1)
                   (->> hearing-metadata-els
                        (second)
-                       (get-el-content))
+                       (utils/get-el-content))
                   nil)
      :timestamp (->> hearing-metadata-els
                      (first)
-                     (get-el-content)
+                     (utils/get-el-content)
                      (format-timestamp))
      :venue (->> html-el
                  (s/select (s/child (s/class "hearing-item-wrapper")))
                  (first)
                  (s/select (s/child (s/class "text")))
                  (first)
-                 (get-el-content))
+                 (utils/get-el-content))
      :coram (->> html-el
                  (s/select (s/child (s/class "hearing-item-wrapper")))
                  (second)
                  (s/select (s/child (s/class "text")))
                  (first)
-                 (get-el-content))}))
+                 (utils/get-el-content))}))
 
-(defn parse-hearing-list-html
-  [html]
-  (->> (bootleg/convert-to html :hickory)
+(defn- parse-hearing-list-html
+  [h-map]
+  (->> h-map
        (s/select (s/child (s/and (s/class "list-item")
                                  (s/tag :a))))
        (map parse-hearing-element)))
 
-(defn get-pagination-status
+(defn- get-pagination-status
   "Returns the number of additional pages there are"
-  [html]
-  (let [pagination-status (->> (bootleg/convert-to html :hickory)
+  [h-map]
+  (let [pagination-status (->> h-map
                                (s/select
                                 (s/child (s/class "pagination-summary")))
                                (first)
-                               (get-el-content)
+                               (utils/get-el-content)
                                (re-find #"Showing results 1-500 of (\d{3,})."))]
     (if (nil? pagination-status)
       0

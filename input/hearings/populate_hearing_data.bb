@@ -1,6 +1,6 @@
 #!/usr/bin/env bb
 
-(ns input.populate_hearing_data
+(ns input.hearings.populate_hearing_data
   (:require [clojure.zip :as zip]
             [clojure.string :as str]
             [babashka.curl :as curl]
