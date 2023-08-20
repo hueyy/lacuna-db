@@ -1,4 +1,4 @@
-name: Obtain latest hearings data
+name: Obtain latest SC data
 
 on:
   workflow_dispatch:
