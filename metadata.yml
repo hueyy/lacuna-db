@@ -1,0 +1,25 @@
+title: law-archive-data
+source: various
+databases:
+  data:
+    tables:
+      commits:
+        hidden: true
+      namespaces:
+        hidden: true
+    queries:
+      sc_by_title:
+        sql: |-
+          SELECT title, COUNT(*) AS count
+          FROM sc
+          GROUP BY title
+          ORDER BY count DESC
+        title: Group SC by title
+      sc_by_organisation:
+        sql: |-
+          SELECT organisation, COUNT(*) AS count
+          FROM sc
+          GROUP BY organisation
+          ORDER BY count DESC
+        title: Group SC by organisation
+        

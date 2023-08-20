@@ -1,0 +1,20 @@
+# flyctl launch added from .gitignore
+**/.lsp
+**/.clj-kondo
+**/.calva
+**/bootleg
+**/*.tgz
+**/.babashka
+**/*.html
+**/*.db-journal
+mergestat
+libmergestat.so
+**/.venv
+**/.vscode
+# Local Netlify folder
+**/.netlify
+
+# flyctl launch added from .venv/.gitignore
+# created by virtualenv automatically
+.venv/**/*
+fly.toml

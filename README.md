@@ -5,6 +5,8 @@ This repository contains legal data obtained various public sources and converte
 - Data about court hearings: `hearings.json`
 - Data about Senior Counsel: `sc.json`
 
+You can view and query the data using [this Datasette instance](https://law-archive-data.fly.dev/data).
+
 The code and configuration files in this repository are licensed under the EUPL-1.2.
 
 The data remains owned by its respective owners. This repository is not affiliated with the Singapore Academy of Law, Singapore Courts, or any government agency, and is provided for convenience only.
