@@ -1,6 +1,6 @@
 #!/usr/bin/env bb
 
-(require '[babashka.process :refer [sh process]]
+(require '[babashka.process :refer [shell sh process]]
          '[babashka.fs :as fs]
          '[cheshire.core :as json]
          '[clojure.string :as str])
@@ -23,23 +23,30 @@
        (map :hash)
        (str/join " ")))
 
-(defn generate-db [namespace input-file]
-  (let [result (sh "poetry run git-history file"
-                   "--start-at" "96398149e899fe720a936dbcd6864f4b4c99b340"
-                   "--skip" (get-ignored-commits)
-                   "--namespace" namespace
-                   DB_FILE input-file)]
-    (if (not (= 0 (:exit result)))
-      (:err result)
-      (:out result))))
+(defn generate-db
+  ([namespace input-file]
+   (generate-db namespace input-file nil nil))
+  ([namespace input-file start-at]
+   (generate-db namespace input-file start-at nil))
+  ([namespace input-file start-at skip]
+   (-> (str "poetry run git-history file"
+            " " DB_FILE
+            " " input-file
+            " --namespace " namespace
+            (if (nil? start-at) "" (str " --start-at " start-at))
+            (if (nil? skip) "" (str " --skip " (str "'" skip "'"))))
+       (shell))))
 
-(defn run-sql-on-db [f]
+(defn- run-sql-on-db [f]
   (let [stream (-> (process ["cat" f]) :out)]
     @(process ["sqlite3" DB_FILE] {:in stream
                                    :out :inherit})))
 
+;; (defn add-table-to-db [table from-db to-db]
+;;   (let))
+
 (defn run []
-  (generate-db "hearings" "hearings.json")
-  (generate-db "sc" "sc.json"))
+  (generate-db "hearings" "hearings.json" "96398149e899fe720a936dbcd6864f4b4c99b340" (get-ignored-commits))
+  (generate-db "sc" "sc.json" "8498ceac9939ca286bd6471ce9f3e963054ae51b"))
 
 (run)

@@ -57,7 +57,7 @@
            (s/select (s/descendant (s/or
                                     (s/tag :span)
                                     (s/tag :font))))
-           (last)
+           (#(if (empty? %) td (last %)))
            (utils/get-el-content))
       (str/replace #"[ \s]" " ") ; normalise weird whitespace characters
       ))
