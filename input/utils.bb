@@ -13,4 +13,6 @@
       (bootleg/convert-to  :hickory)))
 
 (defn get-el-content [el]
-  (->> el :content (str/join "")))
+  (->> el :content
+       (filter string?)
+       (str/join "")))

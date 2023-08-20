@@ -19,11 +19,11 @@
 (def titles ["Mr" "Ms" "Mrs"
              "Professor" "Dr"
              "Attorney-General" "Deputy Attorney-General" "Solicitor-General"
-             "Chief Justice" "Justice" "Judicial Commissioner"
-             "Deputy Presiding Judge"])
+             "Chief Justice" "Judicial Commissioner" "Justice of the Court of Appeal" "Judge of the Appellate Division" "Justice"
+             "Deputy Presiding Judge" "Senior Judge" "Judge" "District Judge"])
 
 (def name-regex (re-pattern (str "(" (str/join "|" titles) ") "
-                                 "([aA-zZ -]+)"
+                                 "([aA-zZ /-]+)"
                                  "(, Judge of Appeal)?"
                                  "( \\(honoris causa\\))?"
                                  "(\\*)?$")))

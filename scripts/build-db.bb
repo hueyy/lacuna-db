@@ -47,6 +47,6 @@
 
 (defn run []
   (generate-db "hearings" "hearings.json" "96398149e899fe720a936dbcd6864f4b4c99b340" (get-ignored-commits))
-  (generate-db "sc" "sc.json" "8498ceac9939ca286bd6471ce9f3e963054ae51b"))
+  (generate-db "sc" "sc.json" "7eb59f5233748762bdc11fd25f31194f5bf919b0"))
 
 (run)
