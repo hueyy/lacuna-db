@@ -24,3 +24,9 @@ bb ./scripts/build-db.bb
 bb ./scripts/publish-dockerfile.bb
 ```
 
+To run Datasette locally:
+
+```bash
+cd law-archive-data
+docker-compose -f ./docker/dev.docker-compose.yml build && docker-compose -f ./docker/dev.docker-compose.yml up
+```
