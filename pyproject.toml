@@ -1,11 +1,10 @@
 [tool.poetry]
-name = "sg-courts-hearings-list"
+name = "law-archive-data"
 version = "0.0.1"
 description = ""
 authors = ["Huey <hello@huey.xyz>"]
 license = "EUPL-1.2"
 readme = "README.md"
-packages = [{include = "sg_courts_hearings_list"}]
 
 [tool.poetry.dependencies]
 python = "^3.10"
