@@ -28,13 +28,6 @@
                                  "( \\(honoris causa\\))?"
                                  "(\\*)?$")))
 
-(defn- format-timestamp [timestamp]
-  (if (str/blank? timestamp)
-    nil
-    (.format DateTimeFormatter/ISO_LOCAL_DATE
-             (LocalDate/parse timestamp
-                              (DateTimeFormatter/ofPattern "d MMM yyyy")))))
-
 (defn- get-page []
   (-> (curl/get URL)
       :body
@@ -59,8 +52,7 @@
                                     (s/tag :font))))
            (#(if (empty? %) td (last %)))
            (utils/get-el-content))
-      (str/replace #"[ \s]" " ") ; normalise weird whitespace characters
-      ))
+      (utils/clean-string)))
 
 (defn- parse-row [row]
   (let [tds (s/select (s/child (s/tag :td)) row)
@@ -70,13 +62,15 @@
     (merge parsed-name
            {:organisation (-> (nth tds 2)
                               (get-span-content)
-                              (str/trim)
+                              (utils/clean-string)
                               (#(if-not (str/blank? %) % nil)))
             :appointment-provision (-> (nth tds 3)
-                                       (get-span-content))
+                                       (get-span-content)
+                                       (utils/clean-string))
             :appointment-date (-> (nth tds 4)
                                   (get-span-content)
-                                  (format-timestamp))})))
+                                  (utils/clean-string)
+                                  (utils/format-short-date))})))
 
 (defn- parse-page [h-map]
   (->> (s/select (s/descendant (s/tag :table)

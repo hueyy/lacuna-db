@@ -4,13 +4,15 @@
   (:require [babashka.curl :as curl]
             [babashka.pods :as pods]
             [clojure.string :as str]
-            [input.utils :as utils]))
+            [input.utils :as utils]
+            [cheshire.core :as json]))
 
 (pods/load-pod 'retrogradeorbit/bootleg "0.1.9")
 
 (require '[pod.retrogradeorbit.hickory.select :as s])
 
-(def URL "https://www.pdpc.gov.sg/Undertakings")
+(def DOMAIN "https://www.pdpc.gov.sg")
+(def URL (str DOMAIN "/Undertakings"))
 
 (defn- parse-row [row]
   (let [tds (s/select (s/child (s/tag :td)) row)
@@ -22,16 +24,17 @@
               (s/select (s/child (s/tag :strong)))
               (first)
               (utils/get-el-content)
-              (str/trim))
+              (utils/clean-string))
      :organisation (->> link
                         (utils/get-el-content)
-                        (str/trim))
-     :url (->> link :attrs :href)
+                        (utils/clean-string))
+     :url (->> link :attrs :href (str DOMAIN))
      :timestamp (->> (nth tds 2)
                      (s/select (s/child (s/tag :strong)))
                      (first)
                      (utils/get-el-content)
-                     (str/trim))}))
+                     (utils/clean-string)
+                     (utils/format-short-date))}))
 
 (defn- parse-undertakings-html [h-map]
   (->> h-map
@@ -47,3 +50,9 @@
       :body
       (utils/parse-html)
       (parse-undertakings-html)))
+
+(->> (get-undertakings)
+     (json/generate-string)
+     (spit "pdpc-undertakings.json"))
+
+; TODO get text from PDF
