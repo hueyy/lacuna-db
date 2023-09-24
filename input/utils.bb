@@ -1,5 +1,6 @@
 (ns input.utils
-  (:require [babashka.pods :as pods]
+  (:require [clojure.zip :as zip]
+            [babashka.pods :as pods]
             [clojure.string :as str])
   (:import [java.time LocalDate]
            [java.time.format DateTimeFormatter])
@@ -15,10 +16,31 @@
   (-> (str "<html>" html "</html>")
       (bootleg/convert-to  :hickory)))
 
-(defn get-el-content [el]
-  (->> el :content
-       (filter string?)
-       (str/join "")))
+(defn get-el-content
+  ([current output]
+   (if (string? current)
+     (str output current)
+     (if (nil? (:content current))
+       output
+       (get-el-content
+        (str/join "" (map #(get-el-content % output)
+                          (:content current)))
+        output))))
+  ([el]
+   (get-el-content el "")))
+
+; Taken from https://github.com/clj-commons/hickory/blob/d721c9accd74b1618200347a0a1f05907441cbfd/src/cljc/hickory/select.cljc#L283
+(defn find-in-text
+  "Returns a function that takes a zip-loc argument and returns the zip-loc
+   passed in if it has some text node in its contents that matches the regular
+   expression. Note that this only applies to the direct text content of a node;
+   nodes which have the given text in one of their child nodes will not be
+   selected."
+  [re]
+  (fn [hzip-loc]
+    (some #(re-find re %) (->> (zip/node hzip-loc)
+                               :content
+                               (filter string?)))))
 
 (defn normalise-whitespace [input-str]
   (str/replace input-str #"[ \s]" " "))

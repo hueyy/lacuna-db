@@ -6,7 +6,7 @@
          '[clojure.string :as str])
 
 (def MERGESTAT_BINARY "mergestat")
-(def DB_FILE "data.db")
+(def DB_FILE "data/data.db")
 
 (defn download-mergestat []
   (sh "wget" "https://github.com/mergestat/mergestat-lite/releases/download/v0.6.1/mergestat-linux-amd64.tar.gz")
@@ -45,8 +45,16 @@
 ;; (defn add-table-to-db [table from-db to-db]
 ;;   (let))
 
+(def HEARINGS_JSON (str/join fs/path-separator
+                             ["data" "hearings.json"]))
+(def SC_JSON (str/join fs/path-separator
+                       ["data" "sc"]))
+
 (defn run []
-  (generate-db "hearings" "hearings.json" "96398149e899fe720a936dbcd6864f4b4c99b340" (get-ignored-commits))
-  (generate-db "sc" "sc.json" "c8ebb498cd605d5e15c366972aa9e829e13b370a"))
+  (generate-db "hearings" HEARINGS_JSON
+               "96398149e899fe720a936dbcd6864f4b4c99b340"
+               (get-ignored-commits))
+  (generate-db "sc" SC_JSON
+               "c8ebb498cd605d5e15c366972aa9e829e13b370a"))
 
 (run)

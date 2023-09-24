@@ -5,8 +5,10 @@ databases:
     tables:
       commits:
         hidden: true
+        allow: false
       namespaces:
         hidden: true
+        allow: false
     queries:
       sc_by_title:
         sql: |-
