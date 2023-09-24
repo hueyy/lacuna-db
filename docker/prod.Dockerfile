@@ -2,7 +2,7 @@ FROM datasetteproject/datasette
 
 RUN datasette install datasette-vega datasette-pretty-json datasette-dashboards
 
-COPY ./data.db /data/data.db
+COPY ./data/data.db /data/data.db
 COPY ./metadata.yml /data/metadata.yml
 
 WORKDIR /app

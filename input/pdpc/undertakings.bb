@@ -17,15 +17,13 @@
 (def DOMAIN "https://www.pdpc.gov.sg")
 (def URL (str DOMAIN "/Undertakings"))
 (def PDF_FILENAME "undertaking.pdf")
-(def JSON_FILE (str/join fs/path-separator
-                         ["data"
-                          "pdpc-undertakings.json"]))
+(def JSON_FILE "data/pdpc-undertakings.json")
+(def HASH_FILE "data/pdpc-undertakings.hash")
 
 (defn- parse-row [row]
   (let [tds (s/select (s/child (s/tag :td)) row)
         link (->> tds (second)
-                  (s/select (s/child (s/tag :strong)
-                                     (s/tag :a)))
+                  (s/select (s/child (s/tag :a)))
                   (first))]
     {:id (->> tds (first)
               (s/select (s/child (s/tag :strong)))
@@ -35,7 +33,9 @@
      :organisation (->> link
                         (utils/get-el-content)
                         (utils/clean-string))
-     :url (->> link :attrs :href (str DOMAIN))
+     :url (->> link :attrs
+               :href
+               (utils/make-absolute-url DOMAIN))
      :timestamp (->> (nth tds 2)
                      (s/select (s/child (s/tag :strong)))
                      (first)
@@ -52,6 +52,14 @@
                                (s/tag :tr)))
        (map parse-row)))
 
+(defn handle-pdf [url]
+  (sh "wget" "--output-document" PDF_FILENAME url)
+  (let [pdf-content (-> (sh ["pdftotext" PDF_FILENAME "-"])
+                        :out
+                        slurp)]
+    (sh "rm" PDF_FILENAME)
+    pdf-content))
+
 (defn parse-undertaking-detail-html [h-map]
   (let [description (-> (s/select (s/and (s/class "rte")
                                          (s/tag :div))
@@ -63,17 +71,14 @@
                      (first)
                      :attrs
                      :href
-                     (str DOMAIN))]
-    (sh "wget" "--output-document" PDF_FILENAME pdf-url)
-    (let [pdf-content (-> (sh "pdftotext" PDF_FILENAME "-")
-                          :out)]
-      (sh "rm" PDF_FILENAME)
-      {:raw-description (-> description (butils/convert-to :html))
-       :description (-> description
-                        (utils/get-el-content)
-                        (str/trim))
-       :pdf-url pdf-url
-       :pdf-content pdf-content})))
+                     (utils/make-absolute-url DOMAIN))]
+    {:raw-description (-> description (butils/convert-to :html))
+     :description (-> description
+                      (utils/get-el-content)
+                      (str/trim))
+     :pdf-url pdf-url
+    ;;  :pdf-content (handle-pdf pdf-url)
+     }))
 
 (defn get-undertaking-detail [url]
   (-> (curl/get url)
@@ -88,24 +93,25 @@
         cur-hash (hash-unordered-coll h-map)]
     (if (= cur-hash prev-hash)
       nil
-      (map #(try
-              (Thread/sleep 5000)
-              (->> % :url
-                   (get-undertaking-detail)
-                   (merge (parse-undertakings-html h-map)
-                          {:hash cur-hash}))
-              (catch Exception e
-                (println (str "Caught eception: "
-                              (.getMessage e)))))))))
+      (let [undertakings (parse-undertakings-html h-map)]
+        (spit HASH_FILE cur-hash)
+        (map #(try
+                (Thread/sleep 5000)
+                (->> % :url
+                     (get-undertaking-detail)
+                     (merge %))
+                (catch Exception e
+                  (println (str "Caught exception: "
+                                (.getMessage e)))))
+             undertakings)))))
 
 (defn- run []
-  (let [current-data (-> (if (fs/exists? JSON_FILE)
-                           (-> (slurp JSON_FILE)
-                               (json/parse-string))
-                           nil))
-        current-undertakings (get-undertakings (:hash current-data))]
+  (let [current-hash (if (fs/exists? HASH_FILE)
+                       (slurp HASH_FILE)
+                       nil)
+        current-undertakings (get-undertakings current-hash)]
     (when (not (nil? current-undertakings))
-      (-> current-undertakings
-          (json/generate-string)
-          (spit JSON_FILE)))))
+      (->> current-undertakings
+           (json/generate-string)
+           (spit JSON_FILE)))))
 

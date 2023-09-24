@@ -3,12 +3,9 @@
 (ns input.hearings.run
   (:require [cheshire.core :as json]
             [input.hearings.get_hearings :refer [get-hearing-list]]
-            [input.hearings.populate_hearing_data :refer [populate-hearing-data]]
-            [babashka.fs :as fs]
-            [clojure.string :as str]))
+            [input.hearings.populate_hearing_data :refer [populate-hearing-data]]))
 
-(def JSON_FILE (str/join fs/path-separator
-                         ["data" "hearings.json"]))
+(def JSON_FILE "data/hearings.json")
 
 (->> (get-hearing-list)
      (populate-hearing-data)

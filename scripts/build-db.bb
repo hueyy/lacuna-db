@@ -45,10 +45,8 @@
 ;; (defn add-table-to-db [table from-db to-db]
 ;;   (let))
 
-(def HEARINGS_JSON (str/join fs/path-separator
-                             ["data" "hearings.json"]))
-(def SC_JSON (str/join fs/path-separator
-                       ["data" "sc"]))
+(def HEARINGS_JSON "data/hearings.json")
+(def SC_JSON "data/sc.json")
 
 (defn run []
   (generate-db "hearings" HEARINGS_JSON

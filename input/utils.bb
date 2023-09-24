@@ -65,3 +65,8 @@
              (-> input-date
                  (fix-month-names)
                  (LocalDate/parse (DateTimeFormatter/ofPattern "d MMM yyyy"))))))
+
+(defn make-absolute-url [domain url]
+  (if (str/starts-with? url "/")
+    (str domain url)
+    url))

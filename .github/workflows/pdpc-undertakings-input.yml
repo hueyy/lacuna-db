@@ -2,8 +2,8 @@ name: Obtain latest PDPC undertakings data
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: '4 21 * * 1' # 9.04PM GMT+8 every Monday
+  # schedule:
+  #   - cron: '4 21 * * 1' # 9.04PM GMT+8 every Monday
 
 jobs:
   scheduled:

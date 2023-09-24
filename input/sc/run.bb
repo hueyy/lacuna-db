@@ -5,16 +5,14 @@
             [babashka.pods :as pods]
             [clojure.string :as str]
             [input.utils :as utils]
-            [cheshire.core :as json]
-            [babashka.fs :as fs]))
+            [cheshire.core :as json]))
 
 (pods/load-pod 'retrogradeorbit/bootleg "0.1.9")
 
 (require '[pod.retrogradeorbit.hickory.select :as s])
 
 (def URL "https://www.sal.org.sg/Services/Appointments/Senior-Counsel/Directory")
-(def JSON_FILE (str/join fs/path-separator
-                         ["data" "sc.json"]))
+(def JSON_FILE "data/sc.json")
 
 (def titles ["Mr" "Ms" "Mrs"
              "Professor" "Dr"

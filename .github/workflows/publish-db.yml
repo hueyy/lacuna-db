@@ -32,7 +32,7 @@ jobs:
           git config user.name "Automated publish"
           git config user.email "actions@users.noreply.github.com"
           git checkout pages
-          git add -f data.db
+          git add -f data/data.db
           timestamp=$(TZ='Asia/Singapore' date)
           git commit -m "Publish db: ${timestamp}"
           git push origin pages --force
@@ -40,7 +40,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            data.db
+            data/data.db
           name: latest
           tag_name: latest
         env:
