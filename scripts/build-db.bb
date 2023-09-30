@@ -14,10 +14,11 @@
   (sh "rm" "mergestat-linux-amd64.tar.gz" "libmergestat.so")
   (sh "chmod +x" MERGESTAT_BINARY))
 
-(defn get-ignored-commits []
+(defn get-ignored-commits [file]
   (when (not (fs/exists? MERGESTAT_BINARY))
     (download-mergestat))
-  (->> (-> (sh "mergestat -f json" "SELECT hash FROM commits WHERE committer_email IS NOT 'actions@users.noreply.github.com'")
+  (->> (-> (sh "mergestat -f json"
+               "SELECT files.path, hash FROM commits, files WHERE files.path IS NOT '" file "'")
            :out
            (json/parse-string true))
        (map :hash)
@@ -25,15 +26,12 @@
 
 (defn generate-db
   ([namespace input-file]
-   (generate-db namespace input-file nil nil))
-  ([namespace input-file start-at]
-   (generate-db namespace input-file start-at nil))
-  ([namespace input-file start-at skip]
+   (generate-db namespace input-file nil))
+  ([namespace input-file skip]
    (-> (str "poetry run git-history file"
             " " DB_FILE
             " " input-file
             " --namespace " namespace
-            (if (nil? start-at) "" (str " --start-at " start-at))
             (if (nil? skip) "" (str " --skip " (str "'" skip "'"))))
        (shell))))
 
@@ -42,17 +40,13 @@
     @(process ["sqlite3" DB_FILE] {:in stream
                                    :out :inherit})))
 
-;; (defn add-table-to-db [table from-db to-db]
-;;   (let))
-
 (def HEARINGS_JSON "data/hearings.json")
 (def SC_JSON "data/sc.json")
 
 (defn run []
   (generate-db "hearings" HEARINGS_JSON
-               "96398149e899fe720a936dbcd6864f4b4c99b340"
-               (get-ignored-commits))
+               (get-ignored-commits HEARINGS_JSON))
   (generate-db "sc" SC_JSON
-               "c8ebb498cd605d5e15c366972aa9e829e13b370a"))
+               (get-ignored-commits SC_JSON)))
 
 (run)
