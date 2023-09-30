@@ -6,7 +6,7 @@ on:
     - cron: '09 00,12 * * *' # 8.09AM and 8.09 PM GMT+8
 
 jobs:
-  scheduled:
+  hearings:
     runs-on: ubuntu-latest
     steps:
     - name: Check out this repo

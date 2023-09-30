@@ -9,15 +9,19 @@
 (def DB_FILE "data/data.db")
 
 (defn download-mergestat []
+  (println "Downloading mergestat")
   (sh "wget" "https://github.com/mergestat/mergestat-lite/releases/download/v0.6.1/mergestat-linux-amd64.tar.gz")
+  (println "Extracting mergestat")
   (sh "tar -xvf" "mergestat-linux-amd64.tar.gz")
+  (println "Cleaning up unnecessary mergestat files")
   (sh "rm" "mergestat-linux-amd64.tar.gz" "libmergestat.so")
+  (println "Setting permissions for mergestat")
   (sh "chmod +x" MERGESTAT_BINARY))
 
 (defn get-ignored-commits [file]
   (when (not (fs/exists? MERGESTAT_BINARY))
     (download-mergestat))
-  (->> (-> (sh "mergestat -f json"
+  (->> (-> (sh "./mergestat -f json"
                "SELECT files.path, hash FROM commits, files WHERE files.path IS NOT '" file "'")
            :out
            (json/parse-string true))

@@ -6,7 +6,7 @@ on:
   #   - cron: '4 21 * * 1' # 9.04PM GMT+8 every Monday
 
 jobs:
-  scheduled:
+  pdpc-undertakings:
     runs-on: ubuntu-latest
     steps:
     - name: Check out this repo
