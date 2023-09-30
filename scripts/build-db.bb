@@ -47,11 +47,14 @@
 
 (def HEARINGS_JSON "data/hearings.json")
 (def SC_JSON "data/sc.json")
+(def PDPC_UNDERTAKINGS_JSON "data/pdpc-undertakings.json")
 
 (defn run []
   (generate-db "hearings" HEARINGS_JSON
                (get-ignored-commits HEARINGS_JSON))
   (generate-db "sc" SC_JSON
-               (get-ignored-commits SC_JSON)))
+               (get-ignored-commits SC_JSON))
+  (generate-db "pdpc-undertakings" PDPC_UNDERTAKINGS_JSON
+               (get-ignored-commits PDPC_UNDERTAKINGS_JSON)))
 
 (run)
