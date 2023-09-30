@@ -2,8 +2,8 @@ name: Obtain latest PDPC undertakings data
 
 on:
   workflow_dispatch:
-  # schedule:
-  #   - cron: '4 21 * * 1' # 9.04PM GMT+8 every Monday
+  schedule:
+    - cron: '49 2 * * 2,4,6' # 10.49PM GMT+8 every Tues, Thurs, and Sat
 
 jobs:
   pdpc-undertakings:
@@ -20,7 +20,7 @@ jobs:
     - name: Install pdftotext
       run: sudo apt-get install -y poppler-utils
     - name: Fetch latest data
-      run: bb ./input/sc/run.bb
+      run: bb ./input/pdpc/run.bb
     - name: Commit and push if it changed
       run: |-
         git config user.name "Automated update"

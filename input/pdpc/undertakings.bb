@@ -7,7 +7,8 @@
             [clojure.string :as str]
             [input.utils :as utils]
             [babashka.process :refer [sh]]
-            [cheshire.core :as json]))
+            [cheshire.core :as json]
+            [taoensso.timbre :as timbre]))
 
 (pods/load-pod 'retrogradeorbit/bootleg "0.1.9")
 
@@ -53,10 +54,10 @@
        (map parse-row)))
 
 (defn handle-pdf [url]
+  (timbre/info "Handling PDF: " url)
   (sh "wget" "--output-document" PDF_FILENAME url)
   (let [pdf-content (-> (sh ["pdftotext" PDF_FILENAME "-"])
-                        :out
-                        slurp)]
+                        :out)]
     (sh "rm" PDF_FILENAME)
     pdf-content))
 
@@ -67,7 +68,7 @@
                         (first))
         pdf-url (->> description
                      (s/select (s/and (s/tag :a)
-                                      (utils/find-in-text #"^\s*here\s*$")))
+                                      (utils/find-in-text #"^(\s| )*here(\s| )*$")))
                      (first)
                      :attrs
                      :href
@@ -77,10 +78,10 @@
                       (utils/get-el-content)
                       (str/trim))
      :pdf-url pdf-url
-    ;;  :pdf-content (handle-pdf pdf-url)
-     }))
+     :pdf-content (handle-pdf pdf-url)}))
 
 (defn get-undertaking-detail [url]
+  (timbre/info "Fetching undertaking detail: " url)
   (-> (curl/get url)
       :body
       (utils/parse-html)
@@ -91,9 +92,13 @@
                   :body
                   (utils/parse-html))
         cur-hash (hash-unordered-coll h-map)]
+    (timbre/info "Fetched PDPC undertakings")
     (if (= cur-hash prev-hash)
-      nil
+      (do
+        (timbre/info "Same hash, do nothing")
+        nil)
       (let [undertakings (parse-undertakings-html h-map)]
+        (timbre/info "Different hash, parse HTML")
         (spit HASH_FILE cur-hash)
         (map #(try
                 (Thread/sleep 5000)
@@ -101,11 +106,11 @@
                      (get-undertaking-detail)
                      (merge %))
                 (catch Exception e
-                  (println (str "Caught exception: "
-                                (.getMessage e)))))
+                  (timbre/error (str "Caught exception: "
+                                     (.getMessage e)))))
              undertakings)))))
 
-(defn- run []
+(defn run []
   (let [current-hash (if (fs/exists? HASH_FILE)
                        (slurp HASH_FILE)
                        nil)

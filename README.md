@@ -1,9 +1,10 @@
 # law-archive-data
 
-This repository contains legal data obtained various public sources and converted into a machine-readable format, including:
+This repository contains Singapore legal data obtained various public sources and converted into a machine-readable format, including relating to the following:
 
-- Data about court hearings: `hearings.json`
-- Data about Senior Counsel: `sc.json`
+- Court hearings: `data/hearings.json`
+- Senior Counsels: `data/sc.json`
+- PDPC undertakings: `data/pdpc-undertakings.json`
 
 You can view and query the data using [this Datasette instance](https://law-archive-data.fly.dev/data).
 

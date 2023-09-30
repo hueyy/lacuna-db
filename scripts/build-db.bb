@@ -3,19 +3,20 @@
 (require '[babashka.process :refer [shell sh process]]
          '[babashka.fs :as fs]
          '[cheshire.core :as json]
-         '[clojure.string :as str])
+         '[clojure.string :as str]
+         '[taoensso.timbre :as timbre])
 
 (def MERGESTAT_BINARY "mergestat")
 (def DB_FILE "data/data.db")
 
 (defn download-mergestat []
-  (println "Downloading mergestat")
+  (timbre/info "Downloading mergestat")
   (sh "wget" "https://github.com/mergestat/mergestat-lite/releases/download/v0.6.1/mergestat-linux-amd64.tar.gz")
-  (println "Extracting mergestat")
+  (timbre/info "Extracting mergestat")
   (sh "tar -xvf" "mergestat-linux-amd64.tar.gz")
-  (println "Cleaning up unnecessary mergestat files")
+  (timbre/info "Cleaning up unnecessary mergestat files")
   (sh "rm" "mergestat-linux-amd64.tar.gz" "libmergestat.so")
-  (println "Setting permissions for mergestat")
+  (timbre/info "Setting permissions for mergestat")
   (sh "chmod +x" MERGESTAT_BINARY))
 
 (defn get-ignored-commits [file]
