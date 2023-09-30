@@ -53,15 +53,7 @@
                                (s/tag :tr)))
        (map parse-row)))
 
-(defn handle-pdf [url]
-  (timbre/info "Handling PDF: " url)
-  (sh "wget" "--output-document" PDF_FILENAME url)
-  (let [pdf-content (-> (sh ["pdftotext" PDF_FILENAME "-"])
-                        :out)]
-    (sh "rm" PDF_FILENAME)
-    pdf-content))
-
-(defn parse-undertaking-detail-html [h-map]
+(defn- parse-undertaking-detail-html [h-map]
   (let [description (-> (s/select (s/and (s/class "rte")
                                          (s/tag :div))
                                   h-map)
@@ -78,9 +70,9 @@
                       (utils/get-el-content)
                       (str/trim))
      :pdf-url pdf-url
-     :pdf-content (handle-pdf pdf-url)}))
+     :pdf-content (utils/get-pdf-content pdf-url)}))
 
-(defn get-undertaking-detail [url]
+(defn- get-undertaking-detail [url]
   (timbre/info "Fetching undertaking detail: " url)
   (-> (curl/get url)
       :body

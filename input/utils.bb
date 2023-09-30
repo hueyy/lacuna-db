@@ -1,7 +1,10 @@
 (ns input.utils
   (:require [clojure.zip :as zip]
             [babashka.pods :as pods]
-            [clojure.string :as str])
+            [clojure.string :as str]
+            [cheshire.core :as json]
+            [babashka.process :refer [sh]]
+            [taoensso.timbre :as timbre])
   (:import [java.time LocalDate]
            [java.time.format DateTimeFormatter])
   (:gen-class))
@@ -70,3 +73,16 @@
   (if (str/starts-with? url "/")
     (str domain url)
     url))
+
+(defn make-json-response-body [body]
+  {:headers {"Content-Type" "application/json; charset=utf-8"}
+   :body (json/generate-string body)})
+
+(def PDF_FILENAME "pdf.pdf")
+(defn get-pdf-content [url]
+  (timbre/info "Handling PDF: " url)
+  (sh "wget" "--output-document" PDF_FILENAME url)
+  (let [pdf-content (-> (sh ["pdftotext" PDF_FILENAME "-"])
+                        :out)]
+    (sh "rm" PDF_FILENAME)
+    pdf-content))

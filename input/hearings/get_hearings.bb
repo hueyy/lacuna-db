@@ -34,8 +34,9 @@
 
 (defn- get-hearing-list-page-raw
   [page]
-  (-> (curl/post URL {:headers {"Content-Type" "application/json; charset=utf-8"}
-                      :body (json/generate-string (make-request-body page))})
+  (-> (curl/post URL (-> page
+                         (make-request-body)
+                         (utils/make-json-response-body)))
       :body
       (json/parse-string true)
       :listPartialView
