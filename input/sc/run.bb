@@ -83,6 +83,7 @@
   (-> (get-page)
       (parse-page)))
 
-(->> (get-data)
-     (json/generate-string)
-     (spit JSON_FILE))
+(defn -main []
+  (->> (get-data)
+       (json/generate-string)
+       (spit JSON_FILE)))

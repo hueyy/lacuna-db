@@ -5,7 +5,8 @@
             [babashka.curl :as curl]
             [babashka.pods :as pods]
             [cheshire.core :as json]
-            [input.utils :as utils])
+            [input.utils :as utils]
+            [input.hearings.populate_hearing_data :refer [populate-hearing-data]])
   (:import [java.time LocalDateTime]
            [java.time.format DateTimeFormatter])
   (:gen-class))
@@ -16,6 +17,7 @@
 (require '[pod.retrogradeorbit.hickory.select :as s])
 
 (def URL "https://www.judiciary.gov.sg/hearing-list/GetFilteredList")
+(def JSON_FILE "data/hearings.json")
 
 (defn- make-request-body
   ([] (make-request-body 0))
@@ -116,3 +118,9 @@
                               (range additional-pages-count))]
     (flatten (cons (parse-hearing-list-html first-page-html)
                    (map parse-hearing-list-html additional-pages)))))
+
+(defn -main []
+  (->> (get-hearing-list)
+       (populate-hearing-data)
+       (json/generate-string)
+       (spit JSON_FILE)))

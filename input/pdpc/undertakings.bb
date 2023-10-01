@@ -6,7 +6,6 @@
             [babashka.fs :as fs]
             [clojure.string :as str]
             [input.utils :as utils]
-            [babashka.process :refer [sh]]
             [cheshire.core :as json]
             [taoensso.timbre :as timbre]))
 
@@ -17,7 +16,6 @@
 
 (def DOMAIN "https://www.pdpc.gov.sg")
 (def URL (str DOMAIN "/Undertakings"))
-(def PDF_FILENAME "undertaking.pdf")
 (def JSON_FILE "data/pdpc-undertakings.json")
 (def HASH_FILE "data/pdpc-undertakings.hash")
 
@@ -112,3 +110,5 @@
            (json/generate-string)
            (spit JSON_FILE)))))
 
+(defn -main []
+  (run))

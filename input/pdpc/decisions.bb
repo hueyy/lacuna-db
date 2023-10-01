@@ -3,14 +3,12 @@
             [babashka.pods :as pods]
             [clojure.string :as str]
             [input.utils :as utils]
-            [babashka.process :refer [sh]]
             [cheshire.core :as json]
             [taoensso.timbre :as timbre]))
 
 (pods/load-pod 'retrogradeorbit/bootleg "0.1.9")
 
-(require '[pod.retrogradeorbit.hickory.select :as s]
-         '[pod.retrogradeorbit.bootleg.utils :as butils])
+(require '[pod.retrogradeorbit.hickory.select :as s])
 
 (def DOMAIN "https://www.pdpc.gov.sg")
 (def URL (str DOMAIN "/api/pdpcenforcementcases/getenforcementcaselisting"))
@@ -112,10 +110,9 @@
       (utils/parse-html)
       (parse-decision-detail-html)))
 
-(defn run []
+(defn -main []
   (->>
-   (get-all-decisions)
-  ;;  (get-latest-n-decision-pages 1)
+   (get-latest-n-decision-pages 1)
    (map #(merge % (get-decision-detail (:url %))))
    (json/generate-string)
    (spit JSON_FILE)))

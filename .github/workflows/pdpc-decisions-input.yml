@@ -1,12 +1,12 @@
-name: Obtain latest hearings data
+name: Obtain latest PDPC decisions data
 
 on:
   workflow_dispatch:
   schedule:
-    - cron: '09 00,12 * * *' # 8.09AM and 8.09 PM GMT+8
+    - cron: '49 14 * * 2,4,6' # 10.49PM GMT+8 every Tues, Thurs, and Sat
 
 jobs:
-  hearings:
+  pdpc-decisions:
     runs-on: ubuntu-latest
     steps:
     - name: Check out this repo
@@ -17,13 +17,15 @@ jobs:
       uses: turtlequeue/setup-babashka@v1.5.0
       with:
         babashka-version: 1.3.185
+    - name: Install pdftotext
+      run: sudo apt-get install -y poppler-utils
     - name: Fetch latest data
-      run: bb --main input.hearings.get_hearings
+      run: bb --main input.pdpc.decisions
     - name: Commit and push if it changed
       run: |-
         git config user.name "Automated update"
         git config user.email "actions@users.noreply.github.com"
         git add -A
         timestamp=$(TZ='Asia/Singapore' date)
-        git commit -m "Latest hearings data: ${timestamp}" || exit 0
+        git commit -m "Latest PDPC decisions data: ${timestamp}" || exit 0
         git push
