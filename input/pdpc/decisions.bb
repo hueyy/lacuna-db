@@ -28,8 +28,8 @@
 
 (defn- parse-decision-json [json]
   (merge json
-         {:date (-> json :date
-                    (utils/format-short-date))
+         {:timestamp (-> json :timestamp
+                         (utils/format-short-date))
           :url (->> json :url
                     (utils/make-absolute-url DOMAIN))}))
 

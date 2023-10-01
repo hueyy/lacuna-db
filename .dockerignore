@@ -18,3 +18,7 @@ libmergestat.so
 # created by virtualenv automatically
 .venv/**/*
 fly.toml
+
+LICENCE
+
+README.md
