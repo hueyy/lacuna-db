@@ -23,7 +23,7 @@
   (when (not (fs/exists? MERGESTAT_BINARY))
     (download-mergestat))
   (->> (-> (sh "./mergestat -f json"
-               "SELECT files.path, hash FROM commits, files WHERE files.path IS NOT '" file "'")
+               (str "SELECT files.path, hash FROM commits, files WHERE files.path IS NOT '" file "'"))
            :out
            (json/parse-string true))
        (map :hash)
@@ -32,13 +32,16 @@
 (defn generate-db
   ([namespace input-file]
    (generate-db namespace input-file nil))
-  ([namespace input-file skip]
+  ([namespace input-file id]
    (-> (str "poetry run git-history file"
             " " DB_FILE
             " " input-file
-            " --namespace " namespace
-            (if (nil? skip) "" (str " --skip " (str "'" skip "'"))))
-       (shell))))
+            " --namespace " "'" namespace "'"
+            (if (nil? id) "" (str " --id " id)))
+       (#(try
+           (shell %)
+           (catch Exception e
+             (timbre/error e)))))))
 
 (defn- run-sql-on-db [f]
   (let [stream (-> (process ["cat" f]) :out)]
@@ -48,13 +51,12 @@
 (def HEARINGS_JSON "data/hearings.json")
 (def SC_JSON "data/sc.json")
 (def PDPC_UNDERTAKINGS_JSON "data/pdpc-undertakings.json")
+(def PDPC_DECISIONS_JSON "data/pdpc-decisions.json")
 
 (defn run []
-  (generate-db "hearings" HEARINGS_JSON
-               (get-ignored-commits HEARINGS_JSON))
-  (generate-db "sc" SC_JSON
-               (get-ignored-commits SC_JSON))
-  (generate-db "pdpc-undertakings" PDPC_UNDERTAKINGS_JSON
-               (get-ignored-commits PDPC_UNDERTAKINGS_JSON)))
+  (generate-db "hearings" HEARINGS_JSON "link")
+  (generate-db "sc" SC_JSON "name")
+  (generate-db "pdpc_undertakings" PDPC_UNDERTAKINGS_JSON "url")
+  (generate-db "pdpc_decisions" PDPC_DECISIONS_JSON "url"))
 
 (run)

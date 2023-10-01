@@ -22,7 +22,6 @@ The historical data across the many commits can be analysed using the [`git-hist
 
 ```bash
 bb ./scripts/build-db.bb
-bb ./scripts/publish-dockerfile.bb
 ```
 
 To run Datasette locally:

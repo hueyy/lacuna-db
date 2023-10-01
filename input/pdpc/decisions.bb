@@ -112,7 +112,7 @@
 
 (defn -main []
   (->>
-   (get-latest-n-decision-pages 1)
+   (get-latest-n-decision-pages 3)
    (map #(merge % (get-decision-detail (:url %))))
    (json/generate-string)
    (spit JSON_FILE)))
