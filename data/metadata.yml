@@ -8,6 +8,27 @@ databases:
       namespaces:
         hidden: true
         allow: false
+      columns:
+        hidden: true
+        allow: false
+      hearings:
+        sort_desc: timestamp
+      hearings_changed:
+        hidden: true
+      hearings_version:
+        hidden: true
+      pdpc_decisions_changed:
+        hidden: true
+      pdpc_decisions_version:
+        hidden: true
+      pdpc_undertakings_changed:
+        hidden: true
+      pdpc_undertakings_version: 
+        hidden: true
+      sc_changed:
+        hidden: true
+      sc_version:
+        hidden: true
     queries:
       sc_by_title:
         sql: |-
@@ -45,7 +66,7 @@ plugins:
           query: >-
             SELECT
               date(`appointment-date`) as date,
-              count(*) AS count
+              SUM(COUNT(*)) OVER (ORDER BY date(`appointment-date`)) AS count
             FROM sc
             WHERE TRUE
             GROUP BY date
@@ -53,20 +74,6 @@ plugins:
           library: vega-lite
           display:
             mark: { type: line, tooltip: true }
-            transform: 
-              - joinaggregate:
-                  - op: sum
-                    field: count
-                    as: total
-                groupby:
-                  - date
-              - window:
-                  - op: sum
-                    field: count
-                    as: total
-              - sort:
-                - field: date
-                  order: ascending
             encoding:
               x: { field: date, type: temporal, timeUnit: yearmonthdate }
               y: { field: total, type: quantitative }
@@ -122,4 +129,48 @@ plugins:
               y: { field: count, type: quantitative }
               x: { field: title, type: nominal }
               color: { field: title, type: nominal }
+    # PDPA:
+    #   title: PDPA Enforcement Statistics
+    #   settings:
+    #     allow_fullscreen: TRUE
+    #   charts:
+    #     enforcement-count:
+    #       title: Enforcement action over time
+    #       db: data
+    #       query: >-
+    #         SELECT
+    #           *
+    #         FROM
+    #           (
+    #             SELECT
+    #               COALESCE(
+    #                 pdpc_undertakings.timestamp,
+    #                 pdpc_decisions.timestamp
+    #               ) AS t,
+    #               COUNT(pdpc_undertakings.timestamp) AS undertakings_count,
+    #               COUNT(pdpc_decisions.timestamp) AS decisions_count
+    #             FROM
+    #               pdpc_undertakings
+    #               LEFT JOIN pdpc_decisions ON pdpc_undertakings.timestamp = pdpc_decisions.timestamp
+    #             UNION
+    #             SELECT
+    #               COALESCE(
+    #                 pdpc_undertakings.timestamp,
+    #                 pdpc_decisions.timestamp
+    #               ) AS t,
+    #               COUNT(pdpc_undertakings.timestamp) AS undertakings_count,
+    #               COUNT(pdpc_decisions.timestamp) AS decisions_count
+    #             FROM
+    #               pdpc_decisions
+    #               LEFT JOIN pdpc_undertakings ON pdpc_undertakings.timestamp = pdpc_decisions.timestamp
+    #             GROUP BY
+    #               t
+    #           )
+    #       library: vega-lite
+    #       display:
+    #         mark: { type: line, tooltip: true }
+    #         encoding:
+    #           x: { field: date, type: temporal, timeUnit: yearmonthdate }
+    #           y: { field: undertakings_total, type: quantitative }
+          
 

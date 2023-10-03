@@ -28,4 +28,5 @@ jobs:
         git add -A
         timestamp=$(TZ='Asia/Singapore' date)
         git commit -m "Latest PDPC decisions data: ${timestamp}" || exit 0
+        git pull --rebase
         git push
