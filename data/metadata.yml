@@ -182,6 +182,14 @@ plugins:
       title: PDPA Enforcement Statistics
       settings:
         allow_fullscreen: TRUE
+      filters:
+        date_start:
+          name: Date Start
+          type: date
+          default: "2016-07-01"
+        date_end:
+          name: Date End
+          type: date
       charts:
         enforcement-count:
           title: Enforcement action over time
@@ -208,6 +216,9 @@ plugins:
               "decisions" AS type
             FROM
               pdpc_decisions
+            WHERE TRUE
+              [[ AND timestamp >= date(:date_start) ]]
+              [[ AND timestamp <= date(:date_end) ]]
             GROUP BY
               timestamp
             ORDER BY 
@@ -281,5 +292,107 @@ plugins:
               x: { field: timestamp, type: temporal, timeUnit: yearmonthdate }
               y: { field: count, type: quantitative }
               color: { field: type, type: nominal }
-          
-
+        obligation-types:
+          title: Number of breaches by obligation
+          db: data
+          query: >-
+            SELECT
+              obligation,
+              COUNT(*) AS count
+            FROM
+              (
+                SELECT
+                  "Protection" as obligation,
+                  title
+                FROM
+                  pdpc_decisions
+                WHERE
+                  title LIKE "%Protection%"
+                UNION
+                SELECT
+                  "Accountability" as obligation,
+                  title
+                FROM
+                  pdpc_decisions
+                WHERE
+                  title LIKE "%Accountability%"
+                  OR title LIKE "%Openness%"
+                UNION
+                SELECT
+                  "Consent" as obligation,
+                  title
+                FROM
+                  pdpc_decisions
+                WHERE
+                  title LIKE "%Consent%"
+                UNION
+                SELECT
+                  "Notification" as obligation,
+                  title
+                FROM
+                  pdpc_decisions
+                WHERE
+                  title LIKE "%Notification%"
+                UNION
+                SELECT
+                  "Purpose Limitation" as obligation,
+                  title
+                FROM
+                  pdpc_decisions
+                WHERE
+                  title LIKE "%Purpose Limitation%"
+                UNION
+                SELECT
+                  "Acccuracy" as obligation,
+                  title
+                FROM
+                  pdpc_decisions
+                WHERE
+                  title LIKE "%Accuracy%"
+                UNION
+                SELECT
+                  "Access and Correction" as obligation,
+                  title
+                FROM
+                  pdpc_decisions
+                WHERE
+                  title LIKE "%Access and Correction%"
+                UNION
+                SELECT
+                  "Data Breach Notification" as obligation,
+                  title
+                FROM
+                  pdpc_decisions
+                WHERE
+                  title LIKE "%Data Breach Notification%"
+                UNION
+                SELECT
+                  "Retention Limitation" as obligation,
+                  title
+                FROM
+                  pdpc_decisions
+                WHERE
+                  title LIKE "%Retention Limitation%"
+                UNION
+                SELECT
+                  "Transfer Limitation" as obligation,
+                  title
+                FROM
+                  pdpc_decisions
+                WHERE
+                  title LIKE "%Transfer Limitation%"
+              )
+            WHERE
+              title NOT LIKE "No Breach of%"
+            GROUP BY
+              obligation
+            ORDER BY
+              obligation ASC
+          # Other options considered and rejected
+          # - SELECT CASE because there can be a breach of multiple obligations
+          library: vega-lite
+          display:
+            mark: { type: arc, tooltip: true }
+            encoding:
+              theta: { field: count, type: quantitative }
+              color: { field: obligation, type: nominal }
