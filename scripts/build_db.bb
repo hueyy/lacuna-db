@@ -1,10 +1,11 @@
 #!/usr/bin/env bb
 
-(require '[babashka.process :refer [shell sh process]]
-         '[babashka.fs :as fs]
-         '[cheshire.core :as json]
-         '[clojure.string :as str]
-         '[taoensso.timbre :as timbre])
+(ns scripts.build-db
+  (:require [babashka.process :refer [shell sh process]]
+            [babashka.fs :as fs]
+            [cheshire.core :as json]
+            [clojure.string :as str]
+            [taoensso.timbre :as timbre]))
 
 (def MERGESTAT_BINARY "mergestat")
 (def DB_FILE "data/data.db")

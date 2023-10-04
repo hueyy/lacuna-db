@@ -21,12 +21,12 @@ The data is obtained periodically via scheduled GitHub action workflows and comm
 The historical data across the many commits can be analysed using the [`git-history`](https://github.com/simonw/git-history) tool.
 
 ```bash
-bb ./scripts/build-db.bb
+bb ./scripts/build_db.bb
 ```
 
 To run Datasette locally:
 
 ```bash
 cd law-archive-data
-docker-compose -f ./docker/dev.docker-compose.yml build && docker-compose -f ./docker/dev.docker-compose.yml up
+bb ./scripts/dev_docker.bb
 ```
