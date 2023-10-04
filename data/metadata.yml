@@ -82,6 +82,10 @@ plugins:
       title: Senior Counsel Statistics
       settings:
         allow_fullscreen: true
+      layout:
+        - [sc-count, latest-scs, sc-time, sc-time]
+        - [sc-organisation, sc-organisation, sc-organisation, sc-organisation]
+        - [sc-titles, sc-titles, sc-titles, sc-deceased]
       charts:
         sc-count:
           title: Total number of SCs
@@ -92,6 +96,18 @@ plugins:
             field: count
             prefix:
             suffix:
+        latest-scs:
+          title: Newest SCs
+          db: data
+          query: >-
+            SELECT
+              `title` || ' ' || `name` AS name,
+              DATE(`appointment-date`) AS date
+            FROM sc
+            WHERE TRUE
+            ORDER BY date DESC
+            LIMIT 5
+          library: table
         sc-time:
           title: Number of SCs by time
           db: data
@@ -108,7 +124,7 @@ plugins:
             mark: { type: line, tooltip: true }
             encoding:
               x: { field: date, type: temporal, timeUnit: yearmonthdate }
-              y: { field: total, type: quantitative }
+              y: { field: count, type: quantitative }
         sc-organisation:
           title: Number of SCs by organisation
           db: data
