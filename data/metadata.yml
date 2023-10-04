@@ -1,4 +1,25 @@
 title: law-archive-data
+about: hueyy/law-archive-data
+about_url: https://github.com/hueyy/law-archive-data
+description_html: |-
+  <div>
+    <p>law-archive-data provides Singapore legal data in machine-readable form</p>
+
+    <h2>Browse dashboards</h2>
+    <ul class="bullets">
+      <li><a href="/-/dashboards/senior_counsel">Senior Counsel</a></li>
+      <li><a href="/-/dashboards/pdpa">PDPA Enforcement Statistics</a></li>
+    </ul>
+
+    <h2>API</h2>
+    <p>
+      There is a JSON API for each table, e.g. <a href="/data/sc.json">/data/sc.json</a>.
+      See <a href="https://docs.datasette.io/en/stable/json_api.html">the Datasette documentation</a> for more details.
+    </p>
+
+    <h2>Databases</h2>
+    <p>Alternatively, explore the data directly:</p>
+  </div>
 databases:
   data:
     tables:
@@ -12,19 +33,30 @@ databases:
         hidden: true
         allow: false
       hearings:
+        source: judiciary.gov.sg/hearing-list
+        source_url: https://www.judiciary.gov.sg/hearing-list
         sort_desc: timestamp
       hearings_changed:
         hidden: true
       hearings_version:
         hidden: true
+      pdpc_decisions:
+        source: pdpc.gov.sg/All-Commissions-Decisions
+        source_url: https://www.pdpc.gov.sg/All-Commissions-Decisions
       pdpc_decisions_changed:
         hidden: true
+      pdpc_undertakings:
+        source: pdpc.gov.sg/Undertakings
+        source_url: https://www.pdpc.gov.sg/Undertakings
       pdpc_decisions_version:
         hidden: true
       pdpc_undertakings_changed:
         hidden: true
       pdpc_undertakings_version: 
         hidden: true
+      sc:
+        source: sal.org.sg/Services/Appointments/Senior-Counsel/Directory
+        source_url: https://www.sal.org.sg/Services/Appointments/Senior-Counsel/Directory
       sc_changed:
         hidden: true
       sc_version:
@@ -46,7 +78,7 @@ databases:
         title: Group SC by organisation
 plugins:
   datasette-dashboards:
-    SC:
+    senior_counsel:
       title: Senior Counsel Statistics
       settings:
         allow_fullscreen: true
@@ -129,48 +161,48 @@ plugins:
               y: { field: count, type: quantitative }
               x: { field: title, type: nominal }
               color: { field: title, type: nominal }
-    # PDPA:
-    #   title: PDPA Enforcement Statistics
-    #   settings:
-    #     allow_fullscreen: TRUE
-    #   charts:
-    #     enforcement-count:
-    #       title: Enforcement action over time
-    #       db: data
-    #       query: >-
-    #         SELECT
-    #           *
-    #         FROM
-    #           (
-    #             SELECT
-    #               COALESCE(
-    #                 pdpc_undertakings.timestamp,
-    #                 pdpc_decisions.timestamp
-    #               ) AS t,
-    #               COUNT(pdpc_undertakings.timestamp) AS undertakings_count,
-    #               COUNT(pdpc_decisions.timestamp) AS decisions_count
-    #             FROM
-    #               pdpc_undertakings
-    #               LEFT JOIN pdpc_decisions ON pdpc_undertakings.timestamp = pdpc_decisions.timestamp
-    #             UNION
-    #             SELECT
-    #               COALESCE(
-    #                 pdpc_undertakings.timestamp,
-    #                 pdpc_decisions.timestamp
-    #               ) AS t,
-    #               COUNT(pdpc_undertakings.timestamp) AS undertakings_count,
-    #               COUNT(pdpc_decisions.timestamp) AS decisions_count
-    #             FROM
-    #               pdpc_decisions
-    #               LEFT JOIN pdpc_undertakings ON pdpc_undertakings.timestamp = pdpc_decisions.timestamp
-    #             GROUP BY
-    #               t
-    #           )
-    #       library: vega-lite
-    #       display:
-    #         mark: { type: line, tooltip: true }
-    #         encoding:
-    #           x: { field: date, type: temporal, timeUnit: yearmonthdate }
-    #           y: { field: undertakings_total, type: quantitative }
+    pdpa:
+      title: PDPA Enforcement Statistics
+      settings:
+        allow_fullscreen: TRUE
+      charts:
+        enforcement-count:
+          title: Enforcement action over time
+          db: data
+          query: >-
+            SELECT
+              *
+            FROM
+              (
+                SELECT
+                  COALESCE(
+                    pdpc_undertakings.timestamp,
+                    pdpc_decisions.timestamp
+                  ) AS t,
+                  COUNT(pdpc_undertakings.timestamp) AS undertakings_count,
+                  COUNT(pdpc_decisions.timestamp) AS decisions_count
+                FROM
+                  pdpc_undertakings
+                  LEFT JOIN pdpc_decisions ON pdpc_undertakings.timestamp = pdpc_decisions.timestamp
+                UNION
+                SELECT
+                  COALESCE(
+                    pdpc_undertakings.timestamp,
+                    pdpc_decisions.timestamp
+                  ) AS t,
+                  COUNT(pdpc_undertakings.timestamp) AS undertakings_count,
+                  COUNT(pdpc_decisions.timestamp) AS decisions_count
+                FROM
+                  pdpc_decisions
+                  LEFT JOIN pdpc_undertakings ON pdpc_undertakings.timestamp = pdpc_decisions.timestamp
+                GROUP BY
+                  t
+              )
+          library: vega-lite
+          display:
+            mark: { type: line, tooltip: true }
+            encoding:
+              x: { field: date, type: temporal, timeUnit: yearmonthdate }
+              y: { field: undertakings_total, type: quantitative }
           
 
