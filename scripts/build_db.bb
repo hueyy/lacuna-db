@@ -58,6 +58,7 @@
   (generate-db "hearings" HEARINGS_JSON "link")
   (generate-db "sc" SC_JSON "name")
   (generate-db "pdpc_undertakings" PDPC_UNDERTAKINGS_JSON "url")
-  (generate-db "pdpc_decisions" PDPC_DECISIONS_JSON "url"))
+  (generate-db "pdpc_decisions" PDPC_DECISIONS_JSON "url")
+  (run-sql-on-db "scripts/create-views.sql"))
 
 (run)

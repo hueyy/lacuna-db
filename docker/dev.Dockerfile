@@ -14,5 +14,4 @@ ENTRYPOINT [ \
   "-p", "8001", \
   "-h", "0.0.0.0", \
   "--metadata", "/data/metadata.yml", \
-  "--setting", "force_https_urls", "1", \
   "--reload"]

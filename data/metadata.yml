@@ -108,13 +108,14 @@ plugins:
             ORDER BY date DESC
             LIMIT 5
           library: table
+          display:
         sc-time:
           title: Number of SCs by time
           db: data
           query: >-
             SELECT
               date(`appointment-date`) as date,
-              SUM(COUNT(*)) OVER (ORDER BY date(`appointment-date`)) AS count
+              SUM(COUNT(*)) OVER (ORDER BY `appointment-date`) AS count
             FROM sc
             WHERE TRUE
             GROUP BY date
@@ -187,38 +188,98 @@ plugins:
           db: data
           query: >-
             SELECT
-              *
+              timestamp,
+              SUM(COUNT(*)) OVER (
+                ORDER BY
+                  timestamp ASC
+              ) AS count,
+              "undertakings" AS type
             FROM
-              (
-                SELECT
-                  COALESCE(
-                    pdpc_undertakings.timestamp,
-                    pdpc_decisions.timestamp
-                  ) AS t,
-                  COUNT(pdpc_undertakings.timestamp) AS undertakings_count,
-                  COUNT(pdpc_decisions.timestamp) AS decisions_count
-                FROM
-                  pdpc_undertakings
-                  LEFT JOIN pdpc_decisions ON pdpc_undertakings.timestamp = pdpc_decisions.timestamp
-                UNION
-                SELECT
-                  COALESCE(
-                    pdpc_undertakings.timestamp,
-                    pdpc_decisions.timestamp
-                  ) AS t,
-                  COUNT(pdpc_undertakings.timestamp) AS undertakings_count,
-                  COUNT(pdpc_decisions.timestamp) AS decisions_count
-                FROM
-                  pdpc_decisions
-                  LEFT JOIN pdpc_undertakings ON pdpc_undertakings.timestamp = pdpc_decisions.timestamp
-                GROUP BY
-                  t
-              )
+              pdpc_undertakings
+            GROUP BY
+              timestamp
+            UNION
+            SELECT
+              timestamp,
+              SUM(COUNT(*)) OVER (
+                ORDER BY
+                  timestamp ASC
+              ) AS count,
+              "decisions" AS type
+            FROM
+              pdpc_decisions
+            GROUP BY
+              timestamp
+            ORDER BY 
+              timestamp ASC
+          # SELECT
+          #   t,
+          #   SUM(u_count) OVER (
+          #     ORDER BY
+          #       t ASC
+          #   ) AS u_sum,
+          #   SUM(d_count) OVER (
+          #     ORDER BY
+          #       t ASC
+          #   ) AS d_sum
+          # FROM
+          #   (
+          #     SELECT
+          #       COALESCE(u.timestamp, d.timestamp) AS t,
+          #       IFNULL(u.count, 0) AS u_count,
+          #       d.count AS d_count
+          #     FROM
+          #       (
+          #         SELECT
+          #           timestamp,
+          #           COUNT(*) AS count
+          #         FROM
+          #           pdpc_undertakings
+          #         GROUP BY
+          #           timestamp
+          #       ) AS u
+          #       LEFT JOIN (
+          #         SELECT
+          #           timestamp,
+          #           COUNT(*) AS count
+          #         FROM
+          #           pdpc_decisions
+          #         GROUP BY
+          #           timestamp
+          #       ) AS d ON u.timestamp = d.timestamp
+          #     UNION
+          #     SELECT
+          #       COALESCE(u.timestamp, d.timestamp) AS t,
+          #       IFNULL(u.count, 0) AS u_count,
+          #       d.count AS d_count
+          #     FROM
+          #       (
+          #         SELECT
+          #           timestamp,
+          #           COUNT(*) AS count
+          #         FROM
+          #           pdpc_decisions
+          #         GROUP BY
+          #           timestamp
+          #       ) AS d
+          #       LEFT JOIN (
+          #         SELECT
+          #           timestamp,
+          #           COUNT(*) AS count
+          #         FROM
+          #           pdpc_undertakings
+          #         GROUP BY
+          #           timestamp
+          #       ) AS u ON u.timestamp = d.timestamp
+          #     GROUP BY
+          #       t
+          #   )
           library: vega-lite
           display:
-            mark: { type: line, tooltip: true }
+            mark: { type: line, point: true, tooltip: true }
             encoding:
-              x: { field: date, type: temporal, timeUnit: yearmonthdate }
-              y: { field: undertakings_total, type: quantitative }
+              x: { field: timestamp, type: temporal, timeUnit: yearmonthdate }
+              y: { field: count, type: quantitative }
+              color: { field: type, type: nominal }
           
 
