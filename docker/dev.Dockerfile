@@ -1,8 +1,18 @@
 FROM datasetteproject/datasette
 
-RUN datasette install datasette-vega datasette-pretty-json datasette-dashboards
+RUN datasette install \
+  datasette-vega \
+  datasette-pretty-json \
+  datasette-dashboards
 
 WORKDIR /app
 
 EXPOSE 8001
-ENTRYPOINT ["datasette", "-i", "/data/data.db", "-p", "8001", "-h", "0.0.0.0", "--metadata", "/data/metadata.yml", "--reload"]
+ENTRYPOINT [ \
+  "datasette", \
+  "-i", "/data/data.db", \
+  "-p", "8001", \
+  "-h", "0.0.0.0", \
+  "--metadata", "/data/metadata.yml", \
+  "--setting", "force_https_urls", "1", \
+  "--reload"]
