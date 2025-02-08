@@ -91,11 +91,11 @@
 
 (def CURL_IMPERSONATE_BINARY "./curl-impersonate-chrome")
 (defn download-curl-impersonator []
-  (download-binary "https://github.com/lexiforest/curl-impersonate/releases/download/v0.8.2/curl-impersonate-v0.8.2.x86_64-linux-gnu.tar.gz"
+  (download-binary "https://github.com/lexiforest/curl-impersonate/releases/download/v0.9.2/curl-impersonate-v0.9.2.x86_64-linux-gnu.tar.gz"
                    :untar? true
                    :filename CURL_IMPERSONATE_BINARY))
 
-(def USER_AGENT "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.3")
+(def USER_AGENT "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.3")
 (defn curli [url & {:keys [raw-args
                            user-agent]
                     :or {raw-args []
