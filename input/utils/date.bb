@@ -1,6 +1,6 @@
 (ns input.utils.date
   (:require [clojure.string :as str])
-  (:import [java.time LocalDate LocalDateTime ZonedDateTime]
+  (:import [java.time LocalDate LocalTime LocalDateTime ZonedDateTime ZoneOffset]
            [java.time.format DateTimeFormatter])
   (:gen-class))
 
@@ -57,3 +57,17 @@
   [date]
   (when (not (nil? date))
     (.format DateTimeFormatter/ISO_LOCAL_DATE date)))
+
+(defn get-current-date
+  "Get the current date (with hour, minutes, and seconds se to zero)"
+  []
+  (LocalDateTime/of (LocalDate/now) (LocalTime/of 0 0 0)))
+
+(defn to-iso-8601-with-tz
+  "Format a date in ISO 8601 (full) format with timezone"
+  [date]
+  (when (not (nil? date))
+    (-> date
+        (.atZone ZoneOffset/UTC)
+        (.toInstant)
+        (.toString))))
