@@ -109,12 +109,15 @@
     (-> (sh command)
         :out)))
 (defn curli-post-json [url body]
-  (-> url
-      (curli :raw-args ["--data" (json/generate-string body)
-                        "--request" "POST"
-                        "--header" "Content-Type: application/json"])
-      (json/parse-string
-       true)))
+  (try (println (str "curl-post-json " url "\n" body))
+       (-> url
+           (curli :raw-args ["--data" (json/generate-string body)
+                             "--request" "POST"
+                             "--header" "Content-Type: application/json"])
+           (json/parse-string true))
+       (catch Exception e
+         (println e)
+         nil)))
 
 (defn random-number [min max]
   (let [range (+ max (- min))]
@@ -122,3 +125,17 @@
 
 (defn wait-for [min max]
   (Thread/sleep (random-number min max)))
+
+(defn retry-func
+  ([fn-to-retry]
+   (retry-func fn-to-retry 3))
+  ([fn-to-retry
+    max-retries]
+   (loop [attempts 1]
+     (let [result (fn-to-retry)]
+       (cond
+         (not (nil? result)) result
+         (< attempts max-retries) (do
+                                    (wait-for (* attempts 1000) (* max-retries 1000))
+                                    (recur (inc attempts)))
+         :else (throw (Exception. (str "Failed to run function after " max-retries " attempts"))))))))

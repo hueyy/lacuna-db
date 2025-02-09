@@ -5,6 +5,7 @@
             [babashka.pods :as pods]
             [cheshire.core :as json]
             [input.utils.general :as utils]
+            [input.utils.date :as date]
             [input.hearings.populate-hearing-data :refer [populate-hearing-data]])
   (:import [java.time LocalDateTime]
            [java.time.format DateTimeFormatter])
@@ -28,16 +29,22 @@
                    :SelectedLawFirms []
                    :SelectedJudges []
                    :SelectedHearingTypes []
-                   :SelectedStartDate nil
-                   :SelectedEndDate nil
+                   :SelectedStartDate (date/to-iso-8601-with-tz (date/get-current-date))
+                   :SelectedEndDate (-> (date/get-current-date)
+                                        (.plusYears 1)
+                                        (date/to-iso-8601-with-tz))
                    :SelectedPageSize 500
                    :SelectedSortBy ""}}))
 
 (defn- get-hearing-list-page-raw
   [page]
-  (-> (utils/curli-post-json URL (make-request-body page))
-      :listPartialView
-      (utils/parse-html)))
+  (try (-> #(utils/curli-post-json URL (make-request-body page))
+           (utils/retry-func)
+           :listPartialView
+           (utils/parse-html))
+       (catch Exception e
+         (println e)
+         nil)))
 
 (defn- get-hearing-type [html-el]
   (let [selection (s/select
