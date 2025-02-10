@@ -19,12 +19,12 @@
 (defn- get-decisions-page
   ([] (get-decisions-page 1))
   ([page-number]
-   (-> (curl/post URL (-> {:industry "all"
-                           :nature "all"
-                           :decision "all"
-                           :penalty "all"
-                           :page page-number}
-                          (utils/make-json-response-body)))
+   (-> (utils/retry-func #(curl/post URL (-> {:industry "all"
+                                              :nature "all"
+                                              :decision "all"
+                                              :penalty "all"
+                                              :page page-number}
+                                             (utils/make-json-response-body))))
        :body
        (json/parse-string true))))
 
@@ -111,7 +111,7 @@
 
 (defn- get-decision-detail [url]
   (timbre/info "Fetching PDPC decision detail: " url)
-  (-> (curl/get url)
+  (-> (utils/retry-func #(curl/get url))
       :body
       (utils/parse-html)
       (parse-decision-detail-html)))

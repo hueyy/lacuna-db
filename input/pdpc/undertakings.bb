@@ -77,13 +77,13 @@
 
 (defn- get-undertaking-detail [url]
   (timbre/info "Fetching undertaking detail: " url)
-  (-> (curl/get url)
+  (-> (utils/retry-func #(curl/get url))
       :body
       (utils/parse-html)
       (parse-undertaking-detail-html)))
 
 (defn- get-undertakings [prev-hash]
-  (let [h-map (-> (curl/get URL)
+  (let [h-map (-> (utils/retry-func #(curl/get URL))
                   :body
                   (utils/parse-html))
         cur-hash (hash-unordered-coll h-map)]

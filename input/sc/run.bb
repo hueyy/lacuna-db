@@ -28,7 +28,7 @@
                                  "(\\*)?$")))
 
 (defn- get-page []
-  (-> (curl/get URL)
+  (-> (utils/retry-func #(curl/get URL))
       :body
       (utils/parse-html)))
 

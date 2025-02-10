@@ -15,7 +15,7 @@
 (def JSON_FILE "data/telco-fbo.json")
 
 (defn- get-page []
-  (-> (curl/get URL)
+  (-> (utils/retry-func #(curl/get URL))
       :body
       (utils/parse-html)))
 
