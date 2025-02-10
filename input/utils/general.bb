@@ -110,13 +110,14 @@
         :out)))
 (defn curli-post-json [url body]
   (try (println (str "curl-post-json " url "\n" body))
-       (-> url
-           (curli :raw-args ["--data" (json/generate-string body)
-                             "--request" "POST"
-                             "--header" "Content-Type: application/json"])
-           (json/parse-string true))
+       (let [result (-> url
+                        (curli :raw-args ["--data" (json/generate-string body)
+                                          "--request" "POST"
+                                          "--header" "Content-Type: application/json"]))]
+         (json/parse-string result true))
        (catch Exception e
-         (println e)
+         (println "Error occurred:" (.getMessage e))
+         (println "Stack trace:" (ex-data e))
          nil)))
 
 (defn random-number [min max]
@@ -132,6 +133,7 @@
   ([fn-to-retry
     max-retries]
    (loop [attempts 1]
+     (println "retry-func: retrying - " attempts)
      (let [result (fn-to-retry)]
        (cond
          (not (nil? result)) result

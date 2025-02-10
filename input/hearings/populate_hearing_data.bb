@@ -60,8 +60,9 @@
      :parties (map parse-party-el parties-els)}))
 
 (defn populate-hearing-data [hearings]
+  (println "Populating hearing list...")
   (map #(try
-          (utils/wait-for 2000 8000)
+          (utils/wait-for 500 3000)
           (->> % :link
                (get-hearing-detail-raw)
                (parse-hearing-detail)
