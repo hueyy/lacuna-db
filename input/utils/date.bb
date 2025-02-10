@@ -69,5 +69,4 @@
   (when (not (nil? date))
     (-> date
         (.atZone ZoneOffset/UTC)
-        (.toInstant)
-        (.toString))))
+        (.format (DateTimeFormatter/ofPattern "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")))))

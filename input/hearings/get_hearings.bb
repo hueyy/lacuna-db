@@ -19,32 +19,36 @@
 (def URL "https://www.judiciary.gov.sg/hearing-list/GetFilteredList")
 (def JSON_FILE "data/hearings.json")
 
+;; (def COURTS {:fjc "Family Justice Courts"
+;;              :suc "Supreme Court"
+;;              :stc "State Courts"})
+
 (defn- make-request-body
   ([] (make-request-body 0))
-  ([page] {:model {:CurrentPage page
-                   :SelectedCourtTab ""
-                   :SearchKeywords ""
-                   :SearchKeywordsGrouping ""
-                   :SelectedCourt ""
-                   :SelectedLawFirms []
-                   :SelectedJudges []
-                   :SelectedHearingTypes []
-                   :SelectedStartDate (date/to-iso-8601-with-tz (date/get-current-date))
-                   :SelectedEndDate (-> (date/get-current-date)
-                                        (.plusYears 1)
-                                        (date/to-iso-8601-with-tz))
-                   :SelectedPageSize 500
-                   :SelectedSortBy ""}}))
+  ([page]
+   {:model {:CurrentPage page
+            :SelectedCourtTab ""
+            :SearchKeywords ""
+            :SearchKeywordsGrouping ""
+            :SelectedCourt ""
+            :SelectedLawFirms []
+            :SelectedJudges []
+            :SelectedHearingTypes []
+            :SelectedStartDate (-> (date/get-current-date)
+                                   (.minusDays 1)
+                                   (date/to-iso-8601-with-tz))
+            :SelectedEndDate (-> (date/get-current-date)
+                                 (.plusYears 1)
+                                 (date/to-iso-8601-with-tz))
+            :SelectedPageSize "800"
+            :SelectedSortBy "0"}}))
 
 (defn- get-hearing-list-page-raw
   [page]
-  (try (-> #(utils/curli-post-json URL (make-request-body page))
-           (utils/retry-func)
-           :listPartialView
-           (utils/parse-html))
-       (catch Exception e
-         (println e)
-         nil)))
+  (-> #(utils/curli-post-json URL (make-request-body page))
+      (utils/retry-func 10)
+      :listPartialView
+      (utils/parse-html)))
 
 (defn- get-hearing-type [html-el]
   (let [selection (s/select
@@ -65,7 +69,13 @@
         (s/select (s/child (s/class "hearing-metadata")
                            (s/class "metadata-wrapper")
                            (s/class "metadata"))
-                  html-el)]
+                  html-el)
+        timestamp (->> hearing-metadata-els
+                       (first)
+                       (utils/get-el-content)
+                       (format-timestamp))
+        hearing-item-wrapper (->> html-el
+                                  (s/select (s/child (s/class "hearing-item-wrapper"))))]
     {:title (->> html-el :attrs :title)
      :link (->> html-el :attrs :href
                 (str "https://www.judiciary.gov.sg"))
@@ -75,18 +85,13 @@
                        (second)
                        (utils/get-el-content))
                   nil)
-     :timestamp (->> hearing-metadata-els
-                     (first)
-                     (utils/get-el-content)
-                     (format-timestamp))
-     :venue (->> html-el
-                 (s/select (s/child (s/class "hearing-item-wrapper")))
+     :timestamp timestamp
+     :venue (->> hearing-item-wrapper
                  (first)
                  (s/select (s/child (s/class "text")))
                  (first)
                  (utils/get-el-content))
-     :coram (->> html-el
-                 (s/select (s/child (s/class "hearing-item-wrapper")))
+     :coram (->> hearing-item-wrapper
                  (second)
                  (s/select (s/child (s/class "text")))
                  (first)
@@ -97,7 +102,7 @@
   (->> h-map
        (s/select (s/child (s/and (s/class "list-item")
                                  (s/tag :a))))
-       (map parse-hearing-element)))
+       (pmap parse-hearing-element)))
 
 (defn- get-pagination-status
   "Returns the number of additional pages there are"
@@ -114,12 +119,13 @@
           (/ 500) (math/ceil) (int)))))
 
 (defn get-hearing-list []
+  (println "Fetching hearing list...")
   (let [first-page-html (get-hearing-list-page-raw 0)
         additional-pages-count (get-pagination-status first-page-html)
         additional-pages (map #(get-hearing-list-page-raw (inc %))
                               (range additional-pages-count))]
     (flatten (cons (parse-hearing-list-html first-page-html)
-                   (map parse-hearing-list-html additional-pages)))))
+                   (pmap parse-hearing-list-html additional-pages)))))
 
 (defn -main []
   (->> (get-hearing-list)
