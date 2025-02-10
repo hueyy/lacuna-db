@@ -54,7 +54,7 @@
        (map utils/clean-string)))
 
 (defn get-case-detail [url]
-  (let [html (-> (curl/get url)
+  (let [html (-> (utils/retry-func #(curl/get url) 5)
                  :body
                  (utils/parse-html))
         body (s/select (s/descendant (s/id "mlContent")
@@ -100,7 +100,7 @@
      :html (butils/convert-to body :html)}))
 
 (defn get-feed [url]
-  (->> (curl/get url)
+  (->> (utils/retry-func #(curl/get url) 5)
        :body
        (xml/parse-rss-feed)
        :items
