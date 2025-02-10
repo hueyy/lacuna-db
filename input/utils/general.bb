@@ -116,7 +116,7 @@
                                           "--header" "Content-Type: application/json"]))]
          (json/parse-string result true))
        (catch Exception e
-         (println "Error occurred:" (.getMessage e))
+         (println "Error occurred:" e)
          (println "Stack trace:" (ex-data e))
          nil)))
 
