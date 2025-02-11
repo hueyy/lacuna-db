@@ -24,7 +24,8 @@
                                               :decision "all"
                                               :penalty "all"
                                               :page page-number}
-                                             (utils/make-json-response-body))))
+                                             (utils/make-json-response-body)))
+                         5 60)
        :body
        (json/parse-string true))))
 
@@ -52,7 +53,6 @@
 
 (defn- get-latest-n-decision-pages [n]
   (reduce (fn [acc cur]
-            (utils/wait-for 2000 8000)
             (timbre/info "Fetching PDPC decision page: " cur)
             (concat acc (->> cur
                              (get-decisions-page)
