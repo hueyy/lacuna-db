@@ -1,7 +1,6 @@
 (ns input.judgments.fc-judgments
   (:require [cheshire.core :as json]
-            [input.judgments.utils :refer [get-feed populate-case-data]]
-            [input.utils.general :as utils]))
+            [input.judgments.utils :refer [get-feed populate-case-data]]))
 
 (def DOMAIN "https://www.lawnet.sg")
 (def MAX 1000)
@@ -10,9 +9,7 @@
 
 (defn get-fc-judgments []
   (->> (get-feed URL)
-       (map #(do
-               (utils/wait-for 3000 7000)
-               (populate-case-data %)))))
+       (map populate-case-data)))
 
 (defn -main []
   (->> (get-fc-judgments)
