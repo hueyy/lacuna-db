@@ -51,7 +51,7 @@
 
 (defn parse-counsel [counsel-str]
   (->> (str/split counsel-str #";")
-       (map utils/clean-string)))
+       (pmap utils/clean-string)))
 
 (defn get-case-detail [url]
   (let [html (-> (utils/retry-func #(curl/get url) 5)
@@ -88,7 +88,7 @@
                                      (s/and (s/tag :p)
                                             (s/class "txt-body")))
                             html)
-                  (map #(-> % (utils/get-el-content) (utils/clean-string))))]
+                  (pmap #(-> % (utils/get-el-content) (utils/clean-string))))]
     {:title title
      :citation citation
      :date date ; date of the judgment
@@ -100,14 +100,13 @@
      :html (butils/convert-to body :html)}))
 
 (defn get-feed [url]
-  (->> (utils/retry-func #(curl/get url) 5)
-       :body
+  (->> (utils/retry-func #(utils/curli url) 5 60)
        (xml/parse-rss-feed)
        :items
-       (map #(rename-keys % {:link :url
-                             :pub-date :timestamp
+       (pmap #(rename-keys % {:link :url
+                              :pub-date :timestamp
                              ; timestamp is the publication date of the RSS item
-                             }))))
+                              }))))
 
 (defn populate-case-data [feed-item]
   (->> feed-item

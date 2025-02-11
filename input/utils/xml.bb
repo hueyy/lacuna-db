@@ -37,4 +37,4 @@
      :description (get-element-content-by-tag :description elements)
      :items (->> elements
                  (filter-by-tag :item)
-                 (map parse-rss-item))}))
+                 (pmap parse-rss-item))}))
