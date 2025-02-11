@@ -57,7 +57,7 @@
      :charge-number (get-field-value hearing-details-el #"(?i)^Charge number$")
      :offence-description (get-field-value hearing-details-el #"(?i)^Offence description$")
      :hearing-outcome (get-field-value hearing-details-el #"(?i)^Hearing outcome$")
-     :parties (map parse-party-el parties-els)}))
+     :parties (pmap parse-party-el parties-els)}))
 
 (defn populate-hearing-data [hearings]
   (println "Populating hearing list...")

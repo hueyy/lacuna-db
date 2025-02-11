@@ -89,11 +89,21 @@
                         filename
                         downloaded-filename))))
 
+(defn get-github-latest-release [username repo-name]
+  (let [release-response (-> (str "https://api.github.com/repos/" username "/" repo-name "/releases/latest")
+                             slurp
+                             (json/parse-string true))]
+    {:tag_name (-> release-response (:tag_name))}))
+
 (def CURL_IMPERSONATE_BINARY "./curl-impersonate-chrome")
 (defn download-curl-impersonator []
-  (download-binary "https://github.com/lexiforest/curl-impersonate/releases/download/v0.9.2/curl-impersonate-v0.9.2.x86_64-linux-gnu.tar.gz"
-                   :untar? true
-                   :filename CURL_IMPERSONATE_BINARY))
+  (let [username "lexiforest"
+        repo-name "curl-impersonate"
+        latest-release (get-github-latest-release username repo-name)]
+    (download-binary (str "https://github.com/" username "/" repo-name "/releases/download/" latest-release
+                          "/curl-impersonate-" latest-release ".x86_64-linux-gnu.tar.gz")
+                     :untar? true
+                     :filename CURL_IMPERSONATE_BINARY)))
 
 (def USER_AGENT "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.3")
 (defn curli [url & {:keys [raw-args
@@ -106,6 +116,7 @@
                          "--user-agent" user-agent]
                         raw-args
                         [url])]
+    (println command)
     (-> (sh command)
         :out)))
 (defn curli-post-json [url body]
@@ -129,15 +140,17 @@
 
 (defn retry-func
   ([fn-to-retry]
-   (retry-func fn-to-retry 3))
+   (retry-func fn-to-retry 3 1))
+  ([fn-to-retry max-retries]
+   (retry-func fn-to-retry max-retries 1))
   ([fn-to-retry
-    max-retries]
+    max-retries
+    multiplier]
    (loop [attempts 1]
-     (println "retry-func: retrying - " attempts)
      (let [result (fn-to-retry)]
        (cond
          (not (nil? result)) result
          (< attempts max-retries) (do
-                                    (wait-for (* attempts 1000) (* max-retries 1000))
+                                    (wait-for (* attempts 1000 multiplier) (* max-retries 1000 multiplier))
                                     (recur (inc attempts)))
          :else (throw (Exception. (str "Failed to run function after " max-retries " attempts"))))))))

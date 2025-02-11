@@ -52,7 +52,7 @@
        (first)
        (s/select (s/descendant (s/tag :tbody)
                                (s/tag :tr)))
-       (map parse-row)))
+       (pmap parse-row)))
 
 (defn- parse-undertaking-detail-html [h-map]
   (let [description (-> (s/select (s/and (s/class "rte")

@@ -49,7 +49,7 @@
                                (s/tag :ul)
                                (s/tag :li)
                                (s/tag :a)))
-       (map parse-item)))
+       (pmap parse-item)))
 
 (defn get-data []
   (-> (get-page)

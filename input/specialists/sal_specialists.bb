@@ -54,10 +54,10 @@
    :url (get-column-contents row "view-title-table-column" :get-href? true)})
 
 (defn get-accredited-specialists []
-  (map parse-row (->> (fetch-html)
-                      (s/select (s/descendant (s/tag :table)
-                                              (s/tag :tbody)
-                                              (s/tag :tr))))))
+  (pmap parse-row (->> (fetch-html)
+                       (s/select (s/descendant (s/tag :table)
+                                               (s/tag :tbody)
+                                               (s/tag :tr))))))
 
 
 (defn -main []
