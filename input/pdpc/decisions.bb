@@ -48,7 +48,7 @@
                                     :items)))
                  first-page
                  (range 2 (+ 1 total-pages)))
-         (map parse-decision-json))))
+         (pmap parse-decision-json))))
 
 (defn- get-latest-n-decision-pages [n]
   (reduce (fn [acc cur]
@@ -57,7 +57,7 @@
             (concat acc (->> cur
                              (get-decisions-page)
                              :items
-                             (map parse-decision-json))))
+                             (pmap parse-decision-json))))
           '()
           (range 1 (+ 1 n))))
 
@@ -103,7 +103,7 @@
                 (s/select (s/descendant (s/class "taglist")
                                         (s/class "taglist__list")
                                         (s/tag :li)))
-                (map parse-tag-html))
+                (pmap parse-tag-html))
      :pdf-url pdf-url
      :pdf-content (pdf/get-content-from-url pdf-url
                                             :ocr? true

@@ -35,7 +35,7 @@
        (drop-while #(-> % (is-case-title?) (not)))
        (partition-by is-case-title?)
        (partition 2)
-       (map flatten)))
+       (pmap flatten)))
 
 (defn parse-case [raw-case]
   (let [pdf-el (->> {:content raw-case}
@@ -48,11 +48,11 @@
                   (utils/get-el-content)
                   (utils/clean-string))
       :html (->> raw-case
-                 (map #(butils/convert-to % :html))
+                 (pmap #(butils/convert-to % :html))
                  (str/join))
       :content (->> raw-case
-                    (map #(-> % (utils/get-el-content)
-                              (utils/clean-string)))
+                    (pmap #(-> % (utils/get-el-content)
+                               (utils/clean-string)))
                     (str/join "\n"))}
      (if (nil? pdf-el)
        {}
@@ -80,17 +80,17 @@
                        :attrs
                        :content)
         raw-cases (split-article-by-cases article)]
-    (map #(-> %
-              (parse-case)
-              (merge {:timestamp timestamp}))
-         raw-cases)))
+    (pmap #(-> %
+               (parse-case)
+               (merge {:timestamp timestamp}))
+          raw-cases)))
 
 (def get-report-detail
   (fn [url]
     (->> (utils/curli url)
          (utils/parse-html)
          (parse-report-detail)
-         (map #(merge % {:url url})))))
+         (pmap #(merge % {:url url})))))
 
 (defn get-reports-page
   ([] (get-reports-page 1))
@@ -124,9 +124,9 @@
             (concat acc (get-report-detail cur)))
           []
           (->> (get-all-pages)
-               (map :items)
+               (pmap :items)
                (flatten)
-               (map :link))))
+               (pmap :link))))
 
 (defn -main []
   (->> (get-all-reports)

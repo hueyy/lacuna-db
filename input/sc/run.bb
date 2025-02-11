@@ -79,7 +79,7 @@
                  h-map)
        (drop 1)
        (drop-last 6)
-       (map parse-row)))
+       (pmap parse-row)))
 
 (defn get-data []
   (-> (get-page)
