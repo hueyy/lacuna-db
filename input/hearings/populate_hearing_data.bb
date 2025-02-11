@@ -59,16 +59,19 @@
      :hearing-outcome (get-field-value hearing-details-el #"(?i)^Hearing outcome$")
      :parties (pmap parse-party-el parties-els)}))
 
+(defn get-and-parse-hearing [hearing]
+  (try
+    (->>
+     (utils/retry-func #(get-hearing-detail-raw (->> hearing
+                                                     :link))
+                       10 60)
+     (parse-hearing-detail)
+     (merge hearing))
+    (catch Exception e
+      (println (str "Caught exception: "
+                    (.getMessage e)))
+      hearing)))
+
 (defn populate-hearing-data [hearings]
   (println "Populating hearing list...")
-  (map #(try
-          (utils/wait-for 500 3000)
-          (->> % :link
-               (get-hearing-detail-raw)
-               (parse-hearing-detail)
-               (merge %))
-          (catch Exception e
-            (println (str "Caught exception: "
-                          (.getMessage e)))
-            %))
-       hearings))
+  (map get-and-parse-hearing hearings))

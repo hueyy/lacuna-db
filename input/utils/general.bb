@@ -93,13 +93,13 @@
   (let [release-response (-> (str "https://api.github.com/repos/" username "/" repo-name "/releases/latest")
                              slurp
                              (json/parse-string true))]
-    {:tag_name (-> release-response (:tag_name))}))
+    {:tag_name (-> release-response :tag_name)}))
 
 (def CURL_IMPERSONATE_BINARY "./curl-impersonate-chrome")
 (defn download-curl-impersonator []
   (let [username "lexiforest"
         repo-name "curl-impersonate"
-        latest-release (get-github-latest-release username repo-name)]
+        latest-release (-> (get-github-latest-release username repo-name) :tag_name)]
     (download-binary (str "https://github.com/" username "/" repo-name "/releases/download/" latest-release
                           "/curl-impersonate-" latest-release ".x86_64-linux-gnu.tar.gz")
                      :untar? true

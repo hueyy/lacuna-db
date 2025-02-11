@@ -46,7 +46,7 @@
 (defn- get-hearing-list-page-raw
   [page]
   (-> #(utils/curli-post-json URL (make-request-body page))
-      (utils/retry-func 10)
+      (utils/retry-func 10 60)
       :listPartialView
       (utils/parse-html)))
 

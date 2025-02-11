@@ -1,6 +1,5 @@
 (ns input.judgments.stc-judgments
   (:require   [cheshire.core :as json]
-              [input.utils.general :as utils]
               [input.judgments.utils :refer [get-feed populate-case-data]]))
 
 (def DOMAIN "https://www.lawnet.sg")
@@ -10,9 +9,7 @@
 
 (defn get-stc-judgments []
   (->> (get-feed URL)
-       (map #(do
-               (utils/wait-for 2000 8000)
-               (populate-case-data %)))))
+       (map populate-case-data)))
 
 (defn -main []
   (->> (get-stc-judgments)

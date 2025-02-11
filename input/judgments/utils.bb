@@ -54,7 +54,7 @@
        (pmap utils/clean-string)))
 
 (defn get-case-detail [url]
-  (let [html (-> (utils/retry-func #(curl/get url) 5)
+  (let [html (-> (utils/retry-func #(curl/get url) 5 60)
                  :body
                  (utils/parse-html))
         body (s/select (s/descendant (s/id "mlContent")

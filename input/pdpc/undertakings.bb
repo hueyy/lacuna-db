@@ -77,7 +77,7 @@
 
 (defn- get-undertaking-detail [url]
   (timbre/info "Fetching undertaking detail: " url)
-  (-> (utils/retry-func #(curl/get url))
+  (-> (utils/retry-func #(curl/get url) 5 60)
       :body
       (utils/parse-html)
       (parse-undertaking-detail-html)))
@@ -96,7 +96,6 @@
         (timbre/info "Different hash, parse HTML")
         (spit HASH_FILE cur-hash)
         (map #(try
-                (utils/wait-for 2000 8000)
                 (->> % :url
                      (get-undertaking-detail)
                      (merge %))
