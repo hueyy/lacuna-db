@@ -1,6 +1,5 @@
 (ns input.judgments.utils
   (:require [babashka.pods :as pods]
-            [babashka.curl :as curl]
             [clojure.string :as str]
             [input.utils.xml :as xml]
             [clojure.set :refer [rename-keys]]
@@ -54,8 +53,7 @@
        (pmap utils/clean-string)))
 
 (defn get-case-detail [url]
-  (let [html (-> (utils/retry-func #(curl/get url) 5 60)
-                 :body
+  (let [html (-> (utils/retry-func #(utils/curli url) 5 60)
                  (utils/parse-html))
         body (s/select (s/descendant (s/id "mlContent")
                                      (s/tag :root))
