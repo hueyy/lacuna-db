@@ -87,7 +87,7 @@
 
 (def get-report-detail
   (fn [url]
-    (->> (utils/retry-func (utils/curli url) 5 60)
+    (->> (utils/retry-func #(utils/curli url) 5 60)
          (utils/parse-html)
          (parse-report-detail)
          (pmap #(merge % {:url url})))))
@@ -97,7 +97,7 @@
   ([page-number]
    (let [url (str URL "?paged=" page-number)]
      (timbre/info "Parsing: " url)
-     (-> (utils/retry-func (utils/curli url) 5 60)
+     (-> (utils/retry-func #(utils/curli url) 5 60)
          (xml/parse-rss-feed)))))
 
 (defn get-all-pages

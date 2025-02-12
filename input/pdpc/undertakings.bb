@@ -77,14 +77,12 @@
 
 (defn- get-undertaking-detail [url]
   (timbre/info "Fetching undertaking detail: " url)
-  (-> (utils/retry-func #(curl/get url) 5 60)
-      :body
+  (-> (utils/retry-func #(utils/curli url) 5 60)
       (utils/parse-html)
       (parse-undertaking-detail-html)))
 
 (defn- get-undertakings [prev-hash]
-  (let [h-map (-> (utils/retry-func #(curl/get URL))
-                  :body
+  (let [h-map (-> (utils/retry-func #(utils/curli URL))
                   (utils/parse-html))
         cur-hash (hash-unordered-coll h-map)]
     (timbre/info "Fetched PDPC undertakings")
