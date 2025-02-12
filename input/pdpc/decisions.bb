@@ -111,8 +111,7 @@
 
 (defn- get-decision-detail [url]
   (timbre/info "Fetching PDPC decision detail: " url)
-  (-> (utils/retry-func #(curl/get url))
-      :body
+  (-> (utils/retry-func #(utils/curli url))
       (utils/parse-html)
       (parse-decision-detail-html)))
 
