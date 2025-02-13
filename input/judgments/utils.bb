@@ -49,8 +49,10 @@
      :counsel entity-matches}))
 
 (defn parse-counsel [counsel-str]
-  (->> (str/split counsel-str #";")
-       (pmap utils/clean-string)))
+  (if counsel-str
+    (->> (str/split counsel-str #";")
+         (pmap utils/clean-string))
+    []))
 
 (defn get-case-detail [url]
   (let [html (-> (utils/retry-func #(utils/curli url) 5 60)
