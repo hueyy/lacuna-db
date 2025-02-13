@@ -38,7 +38,7 @@
                                    (.minusDays 1)
                                    (date/to-iso-8601-with-tz))
             :SelectedEndDate (-> (date/get-current-date)
-                                 (.plusYears 1)
+                                 (.plusDays 5)
                                  (date/to-iso-8601-with-tz))
             :SelectedPageSize "800"
             :SelectedSortBy "0"}}))
