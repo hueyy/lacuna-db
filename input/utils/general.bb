@@ -5,7 +5,7 @@
             [clojure.string :as str]
             [cheshire.core :as json]
             [babashka.process :refer [sh shell]]
-            [taoensso.timbre :as timbre]))
+            [input.utils.log :as log]))
 
 (pods/load-pod 'retrogradeorbit/bootleg "0.1.9")
 
@@ -65,26 +65,26 @@
                                    filename nil}}]
   (when (or (and untar? (nil? filename))
             (and (not untar?) (-> filename (nil?) (not))))
-    (timbre/error "If untar is true, filename must be specified"))
+    (log/error "If untar is true, filename must be specified"))
   (let [downloaded-filename (-> url
                                 (str/split #"\/")
                                 (last))
         extract? (and untar? (-> filename (nil?) (not)))]
-    (timbre/info "Downloading from: " url)
+    (log/debug "Downloading from: " url)
     (shell "wget" url)
     (when extract?
       (let [directory-name (-> downloaded-filename
                                (str/split #"\.tar\.gz")
                                (first))]
-        (timbre/info "Untarring...")
+        (log/debug "Untarring...")
         (shell "tar --one-top-level -xvf" downloaded-filename)
-        (timbre/info "Moving binary out of directory: "
-                     (str directory-name "/" filename))
+        (log/debug "Moving binary out of directory: "
+                   (str directory-name "/" filename))
         (shell "mv" (str directory-name "/" filename) ".")
-        (timbre/info "Removing directory and archive: "
-                     downloaded-filename directory-name)
+        (log/debug "Removing directory and archive: "
+                   downloaded-filename directory-name)
         (shell "rm -Rf" downloaded-filename directory-name)))
-    (timbre/info "Setting execution permissions")
+    (log/debug "Setting execution permissions")
     (shell "chmod +x" (if extract?
                         filename
                         downloaded-filename))))
@@ -116,21 +116,25 @@
                          "--user-agent" user-agent]
                         raw-args
                         [url])]
-    (println command)
+    (log/debug (clojure.string/join " " command))
     (-> (sh command)
         :out)))
 (defn curli-post-json [url body]
-  ((println (str "curl-post-json " url "\n" body))
-   (let [result (-> url
-                    (curli :raw-args ["--data" (json/generate-string body)
-                                      "--request" "POST"
-                                      "--header" "Content-Type: application/json"]))]
-     (try (json/parse-string result true)
-          (catch Exception e
-            (println "Result: " result)
-            (println "Error occurred:" e)
-            (println "Stack trace:" (ex-data e))
-            nil)))))
+  (log/debug "curli-post-json " url "\n" body)
+  (let [result (-> url
+                   (curli :raw-args ["--data" (json/generate-string body)
+                                     "--request" "POST"
+                                     "--header" "Content-Type: application/json"]))]
+    (if (empty? result)
+      (do
+        (log/error "Empty string returned")
+        nil)
+      (try (json/parse-string result true)
+           (catch Exception e
+             (log/debug "Result: " result)
+             (log/error "Error occurred:" e)
+             (log/debug "Stack trace:" (ex-data e))
+             nil)))))
 
 (defn random-number [min max]
   (let [range (+ max (- min))]
@@ -148,10 +152,11 @@
     max-retries
     multiplier]
    (loop [attempts 1]
+     (log/debug "retry-func: attempts - " attempts)
      (let [result (try (fn-to-retry)
                        (catch Exception e
-                         (println "Error occurred:" e)
-                         (println "Stack trace:" (ex-data e))
+                         (log/error "Error occurred:" e)
+                         (log/debug "Stack trace:" (ex-data e))
                          nil))]
        (cond
          (not (nil? result)) result

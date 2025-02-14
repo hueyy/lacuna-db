@@ -1,15 +1,14 @@
 #!/user/bin/env bb
 
 (ns input.pdpc.undertakings
-  (:require [babashka.curl :as curl]
-            [babashka.pods :as pods]
+  (:require [babashka.pods :as pods]
             [babashka.fs :as fs]
             [clojure.string :as str]
             [input.utils.general :as utils]
             [input.utils.date :as date]
             [input.utils.pdf :as pdf]
             [cheshire.core :as json]
-            [taoensso.timbre :as timbre]))
+            [input.utils.log :as log]))
 
 (pods/load-pod 'retrogradeorbit/bootleg "0.1.9")
 
@@ -76,7 +75,7 @@
                                             :ocr-options {:skip-strategy :skip-text})}))
 
 (defn- get-undertaking-detail [url]
-  (timbre/info "Fetching undertaking detail: " url)
+  (log/debug "Fetching undertaking detail: " url)
   (-> (utils/retry-func #(utils/curli url) 5 60)
       (utils/parse-html)
       (parse-undertaking-detail-html)))
@@ -85,21 +84,21 @@
   (let [h-map (-> (utils/retry-func #(utils/curli URL))
                   (utils/parse-html))
         cur-hash (hash-unordered-coll h-map)]
-    (timbre/info "Fetched PDPC undertakings")
+    (log/debug "Fetched PDPC undertakings")
     (if (= cur-hash prev-hash)
       (do
-        (timbre/info "Same hash, do nothing")
+        (log/debug "Same hash, do nothing")
         nil)
       (let [undertakings (parse-undertakings-html h-map)]
-        (timbre/info "Different hash, parse HTML")
+        (log/debug "Different hash, parse HTML")
         (spit HASH_FILE cur-hash)
         (map #(try
                 (->> % :url
                      (get-undertaking-detail)
                      (merge %))
                 (catch Exception e
-                  (timbre/error (str "Caught exception: "
-                                     (.getMessage e)))))
+                  (log/error (str "Caught exception: "
+                                  (.getMessage e)))))
              undertakings)))))
 
 (defn run []

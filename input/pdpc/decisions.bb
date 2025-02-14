@@ -5,7 +5,7 @@
             [input.utils.general :as utils]
             [input.utils.date :as date]
             [cheshire.core :as json]
-            [taoensso.timbre :as timbre]
+            [input.utils.log :as log]
             [input.utils.pdf :as pdf]))
 
 (pods/load-pod 'retrogradeorbit/bootleg "0.1.9")
@@ -40,10 +40,10 @@
 (defn- get-all-decisions []
   (let [{total-pages :totalPages
          first-page :items} (get-decisions-page)]
-    (timbre/info "Fetched first page of PDPC decisions")
+    (log/debug "Fetched first page of PDPC decisions")
     (->> (reduce (fn [acc cur]
-                   (timbre/info "Fetching PDPC decision page: "
-                                cur)
+                   (log/debug "Fetching PDPC decision page: "
+                              cur)
                    (concat acc (->> cur
                                     (get-decisions-page)
                                     :items)))
@@ -53,7 +53,7 @@
 
 (defn- get-latest-n-decision-pages [n]
   (reduce (fn [acc cur]
-            (timbre/info "Fetching PDPC decision page: " cur)
+            (log/debug "Fetching PDPC decision page: " cur)
             (concat acc (->> cur
                              (get-decisions-page)
                              :items
@@ -110,7 +110,7 @@
                                             :ocr-options {:skip-strategy :skip-text})}))
 
 (defn- get-decision-detail [url]
-  (timbre/info "Fetching PDPC decision detail: " url)
+  (log/debug "Fetching PDPC decision detail: " url)
   (-> (utils/retry-func #(utils/curli url))
       (utils/parse-html)
       (parse-decision-detail-html)))
