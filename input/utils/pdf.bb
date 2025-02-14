@@ -1,7 +1,7 @@
 (ns input.utils.pdf
   (:require [babashka.process :refer [sh shell]]
             [clojure.string :as str]
-            [taoensso.timbre :as timbre]))
+            [input.utils.log :as log]))
 
 (defn random-pdf-filename
   [length]
@@ -25,7 +25,7 @@
                                 optimize "0"
                                 invalidate-signatures? true
                                 output-type :pdf}}]
-  (timbre/info "Running ocrmypdf with skip-strategy:" skip-strategy)
+  (log/debug "Running ocrmypdf with skip-strategy:" skip-strategy)
   (let [temp-filename (random-pdf-filename 5)]
     (sh "mv" filename temp-filename)
     (apply shell (filter #(-> % (str/blank?) (not))
@@ -54,7 +54,7 @@
                                           ocr-options]
                                    :or {ocr? false
                                         ocr-options {}}}]
-  (timbre/info "Handling PDF: " url ocr? ocr-options)
+  (log/debug "Handling PDF: " url ocr? ocr-options)
   (let [file-name (random-pdf-filename 5)]
     (download url file-name)
     (when ocr?

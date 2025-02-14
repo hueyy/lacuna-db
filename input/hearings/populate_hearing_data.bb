@@ -2,7 +2,8 @@
 
 (ns input.hearings.populate-hearing-data
   (:require [babashka.pods :as pods]
-            [input.utils.general :as utils]))
+            [input.utils.general :as utils]
+            [input.utils.log :as log]))
 
 (pods/load-pod 'retrogradeorbit/bootleg "0.1.9")
 
@@ -68,10 +69,10 @@
      (parse-hearing-detail)
      (merge hearing))
     (catch Exception e
-      (println (str "Caught exception: "
-                    (.getMessage e)))
+      (log/error (str "Caught exception: "
+                      (.getMessage e)))
       hearing)))
 
 (defn populate-hearing-data [hearings]
-  (println "Populating hearing list...")
+  (log/debug "Populating hearing list...")
   (map get-and-parse-hearing hearings))

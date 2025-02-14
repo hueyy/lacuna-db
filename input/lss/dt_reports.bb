@@ -5,7 +5,7 @@
             [clojure.string :as str]
             [input.utils.pdf :as pdf]
             [cheshire.core :as json]
-            [taoensso.timbre :as timbre]))
+            [input.utils.log :as log]))
 
 (pods/load-pod 'retrogradeorbit/bootleg "0.1.9")
 
@@ -96,7 +96,7 @@
   ([] (get-reports-page 1))
   ([page-number]
    (let [url (str URL "?paged=" page-number)]
-     (timbre/info "Parsing: " url)
+     (log/debug "Parsing: " url)
      (-> (utils/retry-func #(utils/curli url) 5 60)
          (xml/parse-rss-feed)))))
 
@@ -119,7 +119,7 @@
 
 (defn- get-all-reports []
   (reduce (fn [acc cur]
-            (timbre/info "Fetching DT report page: " cur)
+            (log/debug "Fetching DT report page: " cur)
             (concat acc (get-report-detail cur)))
           []
           (->> (get-all-pages)
