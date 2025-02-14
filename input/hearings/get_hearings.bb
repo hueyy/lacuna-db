@@ -6,7 +6,8 @@
             [cheshire.core :as json]
             [input.utils.general :as utils]
             [input.utils.date :as date]
-            [input.hearings.populate-hearing-data :refer [populate-hearing-data]])
+            [input.hearings.populate-hearing-data :refer [populate-hearing-data]]
+            [input.utils.log :as log])
   (:import [java.time LocalDateTime]
            [java.time.format DateTimeFormatter])
   (:gen-class))
@@ -40,11 +41,12 @@
             :SelectedEndDate (-> (date/get-current-date)
                                  (.plusDays 5)
                                  (date/to-iso-8601-with-tz))
-            :SelectedPageSize "800"
+            :SelectedPageSize "750"
             :SelectedSortBy "0"}}))
 
 (defn- get-hearing-list-page-raw
   [page]
+  (log/debug "get-hearing-list-page-raw" page)
   (-> #(utils/curli-post-json URL (make-request-body page))
       (utils/retry-func 10 60)
       :listPartialView
@@ -119,7 +121,7 @@
           (/ 500) (math/ceil) (int)))))
 
 (defn get-hearing-list []
-  (println "Fetching hearing list...")
+  (log/debug "Fetching hearing list...")
   (let [first-page-html (get-hearing-list-page-raw 0)
         additional-pages-count (get-pagination-status first-page-html)
         additional-pages (map #(get-hearing-list-page-raw (inc %))
