@@ -141,7 +141,9 @@
     (+ min (rand-int range))))
 
 (defn wait-for [min max]
-  (Thread/sleep (random-number min max)))
+  (let [wait-time (random-number min max)]
+    (log/debug "wait-for: waiting for " (wait-time / 1000 / 60) " minutes")
+    (Thread/sleep wait-time)))
 
 (defn retry-func
   ([fn-to-retry]
@@ -161,6 +163,6 @@
        (cond
          (not (nil? result)) result
          (< attempts max-retries) (do
-                                    (wait-for (* attempts 1000 multiplier) (* max-retries 1000 multiplier))
+                                    (wait-for (* attempts 1000 multiplier) (* attempts 3 1000 multiplier))
                                     (recur (inc attempts)))
          :else (throw (Exception. (str "Failed to run function after " max-retries " attempts"))))))))
