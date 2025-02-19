@@ -142,7 +142,7 @@
 
 (defn wait-for [min max]
   (let [wait-time (random-number min max)]
-    (log/debug "wait-for: waiting for " (wait-time / 1000 / 60) " minutes")
+    (log/debug "wait-for: waiting for " (/ wait-time 1000 60) " minutes")
     (Thread/sleep wait-time)))
 
 (defn retry-func
