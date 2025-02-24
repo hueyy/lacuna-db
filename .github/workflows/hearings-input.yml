@@ -20,6 +20,14 @@ jobs:
         name: devenv
     - name: Install devenv.sh
       run: nix profile install nixpkgs#devenv
+    - name: Tailscale
+      uses: tailscale/github-action@v3
+      with:
+        oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+        oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
+        tags: tag:github-actions
+    - name: Use named exit node
+      run: timeout 5m sudo -E tailscale set --exit-node="${{ secrets.TAILSCALE_EXIT_NODE }}"
     - name: Fetch latest data
       run: devenv shell fetch-hearings
     - name: Commit and push if it changed
