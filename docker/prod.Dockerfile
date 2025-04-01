@@ -25,4 +25,4 @@ ENTRYPOINT [ \
   "--template-dir", "/app/html-templates", \
   "--static", "assets:/app/dist", \
   "--setting", "force_https_urls", "1", \
-  "--setting", "sql_time_limit_ms", "30000"]
+  "--setting", "sql_time_limit_ms", "120000"]
