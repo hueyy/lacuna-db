@@ -51,7 +51,7 @@
   scripts.automated-git-push.exec = ''
     git config user.name "Automated update"
     git config user.email "actions@users.noreply.github.com"
-    git add -A
+    git add data -A
     timestamp=''$(TZ='Asia/Singapore' date)
     git commit -m "Latest $@ data: ''${timestamp}" || exit 0
     git pull --rebase
