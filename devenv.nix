@@ -54,6 +54,7 @@
     git add data -A
     timestamp=''$(TZ='Asia/Singapore' date)
     git commit -m "Latest $@ data: ''${timestamp}" || exit 0
+    git restore .
     git pull --rebase
     git push
   '';
