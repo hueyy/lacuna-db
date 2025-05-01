@@ -1,8 +1,7 @@
 #!/usr/bin/env bb
 
 (ns input.sc.run
-  (:require [babashka.curl :as curl]
-            [babashka.pods :as pods]
+  (:require [babashka.pods :as pods]
             [clojure.string :as str]
             [input.utils.general :as utils]
             [input.utils.date :as date]

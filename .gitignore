@@ -12,8 +12,7 @@ bootleg
 # Binaries
 /mergestat
 /libmergestat.so
-/curl-impersonate-ff
-/curl-impersonate-chrome
+curl-impersonate-*
 
 # VSCode
 .venv

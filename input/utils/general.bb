@@ -99,7 +99,8 @@
 (defn download-curl-impersonator []
   (let [username "lexiforest"
         repo-name "curl-impersonate"
-        latest-release (-> (get-github-latest-release username repo-name) :tag_name)]
+        latest-release "v0.9.5"]
+    ; (-> (get-github-latest-release username repo-name) :tag_name)
     (download-binary (str "https://github.com/" username "/" repo-name "/releases/download/" latest-release
                           "/curl-impersonate-" latest-release ".x86_64-linux-gnu.tar.gz")
                      :untar? true
