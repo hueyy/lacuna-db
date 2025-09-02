@@ -21,8 +21,8 @@ jobs:
           tags: tag:github-actions
       - name: rebuild and deploy
         run: |
-          ssh ${{ secrets.TAILSCALE_DEPLOY_TARGET }} && \
+          ssh ${{ secrets.TAILSCALE_DEPLOY_TARGET }} " \
           cd ${{ secrets.DEPLOY_DIRECTORY }} && \
           devenv shell build-db && \
           devenv shell build-frontend && \
-          devenv shell prod-datasette
+          devenv shell prod-datasette"
