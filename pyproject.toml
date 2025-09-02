@@ -8,11 +8,11 @@ readme = "README.md"
 package-mode = false
 
 [tool.poetry.dependencies]
-python = "^3.10"
+python = "^3.13"
 git-history = "0.7a0"
 b2 = "^3.10.1"
-sqlite-utils = "^3.35.1"
-ocrmypdf = "^15.3.1"
+sqlite-utils = "^3.38"
+ocrmypdf = "^16.10.4"
 
 
 [build-system]

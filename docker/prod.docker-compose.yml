@@ -1,0 +1,14 @@
+services:
+  app:
+    build:
+      context: ../
+      dockerfile: ./docker/prod.Dockerfile
+    container_name: lacunadb
+    restart: unless-stopped
+    networks:
+      - caddy_network
+
+networks:
+  caddy_network:
+    name: caddy_network
+    external: true

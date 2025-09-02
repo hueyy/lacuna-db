@@ -37,6 +37,11 @@
 
   scripts.build-db.exec = ''bb --main scripts.build-db'';
   scripts.dev-datasette.exec = ''bb ./scripts/dev_docker.bb'';
+  scripts.prod-datasette.exec = ''
+    docker compose -f docker/prod.docker-compose.yml build && \
+    docker compose -f docker/prod.docker-compose.yml down && \
+    docker compose -f docker/prod.docker-compose.yml up -d
+  '';
 
   scripts.fetch-fc-judgments.exec = ''bb --main input.judgments.fc-judgments'';
   scripts.fetch-hearings.exec = ''bb --main input.hearings.get-hearings'';
