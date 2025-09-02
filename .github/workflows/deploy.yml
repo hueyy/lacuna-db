@@ -13,33 +13,16 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4.2.2
+      - name: Tailscale
+        uses: tailscale/github-action@v3
         with:
-          lfs: true
-          fetch-depth: 0
-      - uses: cachix/install-nix-action@v30
-      - uses: cachix/cachix-action@v15
-        with:
-          name: devenv
-      - name: Install devenv.sh
-        run: nix profile install nixpkgs#devenv
-      - uses: actions/cache@v4
-        with:
-          path: |
-            ~/.npm
-            ./app/node_modules
-          key: node-${{ hashFiles('./app/pnpm-lock.yaml') }}
-      - name: Cache db
-        id: cache-db
-        uses: actions/cache@v4
-        with:
-          path: ./data/data.db
-          key: cache-${{ hashFiles('input/**') }}-${{ hashFiles('scripts/**') }}
-      - name: Generate db
-        run: devenv shell build-db
-      - name: Build frontend
-        run: devenv shell build-frontend
-      - name: deploy
-        run: devenv shell cd-deploy
-        env:
-          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
+          tags: tag:github-actions
+      - name: rebuild and deploy
+        run: |
+          ssh ${{ secrets.TAILSCALE_DEPLOY_TARGET }} && \
+          cd ${{ secrets.DEPLOY_DIRECTORY }} && \
+          devenv shell build-db && \
+          devenv shell build-frontend && \
+          devenv shell prod-datasette
