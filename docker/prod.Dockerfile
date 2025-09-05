@@ -6,7 +6,8 @@ RUN datasette install \
   datasette-dashboards \
   datasette-sqlite-regex \
   datasette-atom \
-  datasette-block-robots
+  datasette-block-robots \
+  datasette datasette-matomo
 
 COPY ./data/data.db /data/data.db
 COPY ./data/metadata.yml /data/metadata.yml

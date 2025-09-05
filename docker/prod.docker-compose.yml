@@ -7,6 +7,9 @@ services:
     restart: unless-stopped
     networks:
       - caddy_network
+    environment:
+      DATASETTE_MATOMO_SERVER_URL: //analytics.huey.xyz/
+      DATASETTE_MATOMO_SITE_ID: 1
 
 networks:
   caddy_network:

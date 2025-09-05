@@ -27,6 +27,7 @@ jobs:
           key: ${{ secrets.PRIVATE_KEY }}
           script: |
             cd ${{ secrets.DEPLOY_DIRECTORY }} && \
+            git pull --rebase && \
             devenv shell build-db && \
             devenv shell build-frontend && \
             devenv shell prod-datasette
