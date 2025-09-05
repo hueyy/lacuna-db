@@ -20,12 +20,13 @@ jobs:
           oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
           tags: tag:github-actions
       - name: rebuild and deploy
-        run: |
-          mkdir -p /home/runner/.ssh
-          ssh-keygen -R ${{ secrets.TAILSCALE_DEPLOY_TARGET }}
-          echo "${{ secrets.PRIVATE_KEY }}" > privatekey
-          ssh -i privatekey -o UserKnownHostsFile=/dev/null huey@${{ secrets.TAILSCALE_DEPLOY_TARGET }} ' \
-          cd ${{ secrets.DEPLOY_DIRECTORY }} && \
-          devenv shell build-db && \
-          devenv shell build-frontend && \
-          devenv shell prod-datasette'
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.TAILSCALE_DEPLOY_TARGET }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.PRIVATE_KEY }}
+          script: |
+            cd ${{ secrets.DEPLOY_DIRECTORY }} && \
+            devenv shell build-db && \
+            devenv shell build-frontend && \
+            devenv shell prod-datasette
