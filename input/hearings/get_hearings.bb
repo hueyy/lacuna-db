@@ -20,6 +20,8 @@
 (def URL "https://www.judiciary.gov.sg/hearing-list/GetFilteredList")
 (def JSON_FILE "data/hearings.json")
 
+(def PAGE_SIZE 750)
+
 ;; (def COURTS {:fjc "Family Justice Courts"
 ;;              :suc "Supreme Court"
 ;;              :stc "State Courts"})
@@ -35,13 +37,13 @@
             :SelectedLawFirms []
             :SelectedJudges []
             :SelectedHearingTypes []
-            :SelectedStartDate (-> (date/get-current-date)
-                                   (.minusDays 1)
-                                   (date/to-iso-8601-with-tz))
-            :SelectedEndDate (-> (date/get-current-date)
-                                 (.plusDays 5)
-                                 (date/to-iso-8601-with-tz))
-            :SelectedPageSize "750"
+            :SelectedStartDate nil
+            ;; (-> (date/get-current-date)
+            ;;     (.minusDays 1)
+            ;;     (date/to-iso-8601-with-tz))
+            :SelectedEndDate nil
+            ;; (-> (date/get-current-date) (.plusDays 60) (date/to-iso-8601-with-tz))
+            :SelectedPageSize (str PAGE_SIZE)
             :SelectedSortBy "0"}}))
 
 (defn- get-hearing-list-page-raw
@@ -114,7 +116,7 @@
                                 (s/child (s/class "pagination-summary")))
                                (first)
                                (utils/get-el-content)
-                               (re-find #"(?i)Showing results 1-500 of (\d{3,})."))]
+                               (re-find (re-pattern (str "(?i)Showing results 1-" PAGE_SIZE " of (\\d{3,})\\."))))]
     (if (nil? pagination-status)
       0
       (-> pagination-status (last) (Integer.)
