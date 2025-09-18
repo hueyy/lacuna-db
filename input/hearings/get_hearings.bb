@@ -21,6 +21,7 @@
 (def JSON_FILE "data/hearings.json")
 
 (def PAGE_SIZE 750)
+(def MAX_DAYS 90)
 
 ;; (def COURTS {:fjc "Family Justice Courts"
 ;;              :suc "Supreme Court"
@@ -38,11 +39,11 @@
             :SelectedJudges []
             :SelectedHearingTypes []
             :SelectedStartDate nil
-            ;; (-> (date/get-current-date)
-            ;;     (.minusDays 1)
-            ;;     (date/to-iso-8601-with-tz))
+            (-> (date/get-current-date)
+                (.minusDays 1)
+                (date/to-iso-8601-with-tz))
             :SelectedEndDate nil
-            ;; (-> (date/get-current-date) (.plusDays 60) (date/to-iso-8601-with-tz))
+            (-> (date/get-current-date) (.plusDays MAX_DAYS) (date/to-iso-8601-with-tz))
             :SelectedPageSize (str PAGE_SIZE)
             :SelectedSortBy "0"}}))
 
