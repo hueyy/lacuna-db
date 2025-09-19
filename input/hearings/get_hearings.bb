@@ -38,12 +38,10 @@
             :SelectedLawFirms []
             :SelectedJudges []
             :SelectedHearingTypes []
-            :SelectedStartDate nil
-            (-> (date/get-current-date)
-                (.minusDays 1)
-                (date/to-iso-8601-with-tz))
-            :SelectedEndDate nil
-            (-> (date/get-current-date) (.plusDays MAX_DAYS) (date/to-iso-8601-with-tz))
+            :SelectedStartDate (-> (date/get-current-date)
+                                   (.minusDays 1)
+                                   (date/to-iso-8601-with-tz))
+            :SelectedEndDate (-> (date/get-current-date) (.plusDays MAX_DAYS) (date/to-iso-8601-with-tz))
             :SelectedPageSize (str PAGE_SIZE)
             :SelectedSortBy "0"}}))
 
@@ -118,6 +116,10 @@
                                (first)
                                (utils/get-el-content)
                                (re-find (re-pattern (str "(?i)Showing results 1-" PAGE_SIZE " of (\\d{3,})\\."))))]
+    (log/debug (->> h-map
+                    (s/select
+                     (s/child (s/class "pagination-summary")))
+                    (first)))
     (if (nil? pagination-status)
       0
       (-> pagination-status (last) (Integer.)
