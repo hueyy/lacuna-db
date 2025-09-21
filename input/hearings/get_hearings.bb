@@ -29,8 +29,8 @@
 
 (defn- make-request-body
   ([] (make-request-body 0))
-  ([page]
-   {:model {:CurrentPage page
+  ([page-number]
+   {:model {:CurrentPage page-number
             :SelectedCourtTab ""
             :SearchKeywords ""
             :SearchKeywordsGrouping ""
@@ -46,9 +46,9 @@
             :SelectedSortBy "0"}}))
 
 (defn- get-hearing-list-page-raw
-  [page]
-  (log/debug "get-hearing-list-page-raw" page)
-  (-> #(utils/curli-post-json URL (make-request-body page))
+  [page-number]
+  (log/debug "get-hearing-list-page-raw" page-number)
+  (-> #(utils/curli-post-json URL (make-request-body page-number))
       (utils/retry-func 10 60)
       :listPartialView
       (utils/parse-html)))
@@ -129,8 +129,10 @@
   (log/debug "Fetching hearing list...")
   (let [first-page-html (get-hearing-list-page-raw 0)
         additional-pages-count (get-pagination-status first-page-html)
-        additional-pages (map #(get-hearing-list-page-raw (inc %))
-                              (range additional-pages-count))]
+        additional-pages (->> (range additional-pages-count)
+                              (partition-all 2)
+                              (mapcat (fn [chunk]
+                                        (pmap #(get-hearing-list-page-raw (inc %)) chunk))))]
     (flatten (cons (parse-hearing-list-html first-page-html)
                    (pmap parse-hearing-list-html additional-pages)))))
 

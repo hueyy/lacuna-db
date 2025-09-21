@@ -137,6 +137,29 @@
              (log/debug "Stack trace:" (ex-data e))
              nil)))))
 
+(def ^:dynamic *latency-window* (atom []))
+(def ^:dynamic *concurrency-limit* (atom 3))  ; Start with moderate concurrency
+
+(defn record-latency! [ms]
+  (log/debug "Current latency: " ms)
+  (swap! *latency-window* #(-> (conj % ms)
+                               (subvec (max 0 (- (count %) 10)))))) ; Keep last 10 measurements
+
+(defn calculate-concurrency! []
+  (let [window @*latency-window*
+        avg-latency (if (empty? window)
+                      500  ; Default if no measurements
+                      (/ (reduce + window) (count window)))
+        concurrency (cond
+                      (> avg-latency 2000) 1   ; High latency - minimal concurrency
+                      (> avg-latency 1500) 2
+                      (> avg-latency 1000) 3
+                      :else 5)  ; Low latency - maximum concurrency
+        ]
+    (log/debug "Average latency: " avg-latency)
+    (log/debug "Request concurrency: " concurrency)
+    (reset! *concurrency-limit* concurrency)))
+
 (defn random-number [min max]
   (let [range (+ max (- min))]
     (+ min (rand-int range))))

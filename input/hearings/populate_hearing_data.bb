@@ -62,12 +62,15 @@
 
 (defn get-and-parse-hearing [hearing]
   (try
-    (->>
-     (utils/retry-func #(get-hearing-detail-raw (->> hearing
-                                                     :link))
-                       10 60)
-     (parse-hearing-detail)
-     (merge hearing))
+    (let [start-time (System/currentTimeMillis)
+          result (->> (utils/retry-func #(get-hearing-detail-raw (->> hearing
+                                                                      :link))
+                                        10 60)
+                      (parse-hearing-detail)
+                      (merge hearing))
+          latency (- (System/currentTimeMillis) start-time)]
+      (utils/record-latency! latency)
+      result)
     (catch Exception e
       (log/error (str "Caught exception: "
                       (.getMessage e)))
@@ -75,4 +78,17 @@
 
 (defn populate-hearing-data [hearings]
   (log/debug "Populating hearing list...")
-  (map get-and-parse-hearing hearings))
+  (utils/calculate-concurrency!)
+  (let [concurrency @utils/*concurrency-limit*
+        total (count hearings)
+        chunks (partition-all concurrency hearings)
+        total-chunks (count chunks)]
+    (log/debug "Total hearings:" total "| Chunk size:" concurrency "| Total chunks:" total-chunks)
+    (->> chunks
+         (map-indexed (fn [idx chunk]
+                        (let [result (doall (pmap get-and-parse-hearing chunk))]
+                          (log/debug "Processed chunk" (inc idx) "/" total-chunks
+                                     "(" (int (* 100 (/ (* (inc idx) concurrency) total))) "%)")
+                          result)))
+         (mapcat identity)
+         (doall))))
