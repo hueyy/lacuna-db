@@ -21,7 +21,7 @@
 (def JSON_FILE "data/hearings.json")
 
 (def PAGE_SIZE 750)
-(def MAX_DAYS 90)
+(def MAX_DAYS 80)
 
 ;; (def COURTS {:fjc "Family Justice Courts"
 ;;              :suc "Supreme Court"
