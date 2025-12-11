@@ -5,7 +5,7 @@
     pkgs.tzdata
     pkgs.git
     pkgs.babashka
-    pkgs.poppler_utils
+    pkgs.poppler-utils
     pkgs.ghostscript
     pkgs.tesseract
     pkgs.sqlite
